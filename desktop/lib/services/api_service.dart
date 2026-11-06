@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ── Change this to your real Django server URL ──
-// const String kBaseUrl = 'https://camifyai.com/api/v1';
-const String kBaseUrl = 'http://10.112.60.138:8000/api/v1';
+const String kBaseUrl = 'https://camifyai.com/api/v1';
+// const String kBaseUrl = 'http://10.112.60.138:8000/api/v1';
 
 /// Safely decode a JSON body — returns an empty map if body is null/empty/invalid.
 Map<String, dynamic> _safeJsonDecode(String? body) {
