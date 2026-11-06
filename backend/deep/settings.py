@@ -402,8 +402,15 @@ XMAX_ENVIRONMENT = os.environ.get("XMAX_ENVIRONMENT", "global")
 NOWPAYMENTS_CURRENCIES = [code.strip().lower() for code in os.environ.get("NOWPAYMENTS_CURRENCIES", "usdtbsc").split(",") if code.strip()]
 NOWPAYMENTS_PAYOUT_CURRENCY = os.environ.get("NOWPAYMENTS_PAYOUT_CURRENCY", "usdtbsc")
 
+
+# NOWPayments checkout configuration
+# Customer pays provider fees.
+# Floating-rate checkout is configured in nowpayments.py.
+
 NOWPAYMENTS_FEE_PAID_BY_USER = os.environ.get(
-    "NOWPAYMENTS_FEE_PAID_BY_USER", "false"
-).lower() == "true"
+    "NOWPAYMENTS_FEE_PAID_BY_USER",
+    "true",
+).strip().lower() == "true"
+
 
 NOWPAYMENTS_CALLBACK_URL = os.environ.get("NOWPAYMENTS_CALLBACK_URL", "")

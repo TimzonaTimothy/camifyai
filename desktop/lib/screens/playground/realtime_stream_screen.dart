@@ -754,10 +754,22 @@ window.startStream = async function() {
     localVideo.muted = true;
     await rtClient.setStateListener(state => {
       log('XMax: ' + state.connectionState);
-      if (state.reason?.kind === 'failure') {
-        const message = state.reason.error.message;
-        window.stopStream().then(() => setStatus('Disconnected: ' + message, 'error'));
-      } else if (state.connectionState === sdk.RealtimeConnectionState.generating) {
+      
+if (state.reason?.kind === 'failure') {
+  const error = state.reason.error;
+  const message = error?.message || 'Unknown WebRTC failure';
+
+  console.error('XMax connection failure', {
+    code: error?.code,
+    message,
+    connectionState: state.connectionState,
+  });
+
+  window.stopStream().then(() => {
+    setStatus('Disconnected: ' + message, 'error');
+  });
+}
+ else if (state.connectionState === sdk.RealtimeConnectionState.generating) {
         remotePh.style.display = 'none';
         setLive(true);
         setStatus('Live · Your look is ready', 'live');
@@ -774,11 +786,27 @@ window.startStream = async function() {
       notifyPopout();
     });
     setStatus('Requesting camera…');
-    localStream = await rtClient.createLocalCameraStream({
-      preset: sdk.RealtimeCameraPreset.resolution1920x1080,
-      position: sdk.CameraPosition.front,
-      useMicrophone: false,
-    });
+    
+localStream = await rtClient.createLocalCameraStream({
+  videoFormat: new sdk.RealtimeVideoFormat({
+    width: 1280,
+    height: 720,
+    fps: 30,
+  }),
+  position: sdk.CameraPosition.front,
+  useMicrophone: false,
+  enableFrameValidation: true,
+});
+
+if (!localStream?.videoTrack) {
+  throw new Error("Camera failed to provide a video track");
+}
+
+console.log("Camera track ready:", {
+  state: localStream.videoTrack.readyState,
+  settings: localStream.videoTrack.getSettings?.(),
+});
+
     localView.track = localStream.videoTrack;
     localPh.style.display = 'none';
     referencePath = undefined;
