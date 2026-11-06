@@ -1,0 +1,4 @@
+[console_scripts]
+decart-format = black:main
+decart-lint = ruff:main
+decart-test = pytest:main
