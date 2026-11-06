@@ -1,10 +1,10 @@
 [Setup]
 AppName=camifyai
-AppVersion=1.0.11
+AppVersion=1.0.0
 DefaultDirName={autopf}\camifyai
 DefaultGroupName=camifyai
 OutputDir=installer_output
-OutputBaseFilename=camifyai-Setup-1.0.11
+OutputBaseFilename=camifyai-Setup-1.0.0
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64

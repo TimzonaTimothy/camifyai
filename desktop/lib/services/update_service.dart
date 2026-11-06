@@ -6,7 +6,7 @@ import 'api_service.dart';
 
 /// The current version of this build.
 /// Bump this string with every release (matching your backend's version).
-const String kCurrentVersion = '1.0.11';
+const String kCurrentVersion = '1.0.0';
 
 class UpdateInfo {
   final String version;
