@@ -1,655 +1,215 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>camifyai — Your camera, any face, live.</title>
-  <meta name="description" content="camifyai turns any portrait into a live camera feed. A real-time virtual webcam for Zoom, Meet, Teams, Discord and OBS — pay by the second, no subscription." />
-  <meta name="author" content="camifyai" />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://streamaicam.com/" />
-  <meta property="og:site_name" content="camifyai" />
-  <meta property="og:title" content="camifyai — Your camera, any face, live." />
-  <meta property="og:description" content="A real-time AI camera that runs underneath any video app. Live face and avatar streaming, billed by the second." />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="camifyai — Your camera, any face, live." />
-  <meta name="twitter:description" content="A real-time AI camera that runs underneath any video app. Live face and avatar streaming, billed by the second." />
-
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236C63FF'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23E7B978'/%3E%3C/svg%3E" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101313">
+  <meta name="description" content="CamifyAI makes live AI-powered camera transformations simple. Create your look, stream from your browser, and send your output to OBS. Flexible prepaid streaming time.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CamifyAI — A new look. Live on camera.">
+  <meta property="og:description" content="Create a look, go live, and bring your AI output into your stream. Prepaid time, no recurring subscription required.">
+  <meta property="og:url" content="https://streamaicam.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>CamifyAI — A new look. Live on camera.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='13' fill='%23141A17'/%3E%3Cpath d='M15 21a9 9 0 0 1 18 0v6a9 9 0 0 1-18 0z' fill='none' stroke='%23C9EF9C' stroke-width='3'/%3E%3Ccircle cx='24' cy='24' r='3' fill='%23C9EF9C'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0D0D1A;
-      --bg-2: #121226;
-      --panel: #1A1A2E;
-      --panel-warm: #1D1A2C;
-      --line: rgba(245,240,232,.09);
-      --line-soft: rgba(245,240,232,.055);
-      --accent: #6C63FF;
-      --accent-bright: #9089FF;
-      --accent-glow: rgba(108,99,255,.30);
-      --gold: #E7B978;
-      --gold-soft: rgba(231,185,120,.14);
-      --gold-line: rgba(231,185,120,.4);
-      --ink: #F7F3EC;
-      --ink-2: #BDB7CC;
-      --ink-3: #837E97;
-      --ink-4: #55516a;
-      --maxw: 1160px;
+      /* Matches desktop/lib/theme/app_theme.dart */
+      --bg:#101313; --surface:#141A17; --card:#191E1D; --hover:#232C26;
+      --border:#303936; --accent:#C9EF9C; --accent-light:#DEF6C3;
+      --accent-dim:#253421; --on-accent:#162015; --success:#A9D8AE;
+      --warning:#E3C286; --text:#F1F5EE; --secondary:#A0ACA6; --muted:#86958C;
+      --width:1180px;
     }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    html, body { margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.65;
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3, h4 {
-      font-family: 'Newsreader', ui-serif, Georgia, serif;
-      margin: 0;
-      color: var(--ink);
-      font-weight: 500;
-      letter-spacing: -0.01em;
-    }
-    em, .accent-italic { font-style: italic; color: var(--gold); font-weight: 400; }
-
-    p { color: var(--ink-2); margin: 0; }
-    a { color: inherit; text-decoration: none; }
-    button { font-family: inherit; cursor: pointer; border: 0; background: transparent; color: inherit; }
-
-    a:focus-visible, button:focus-visible, input:focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 3px;
-    }
-
-    .container { max-width: var(--maxw); margin: 0 auto; padding: 0 30px; }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-      padding: 14px 26px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600; font-size: 15px;
-      border-radius: 100px;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      white-space: nowrap;
-    }
-    .btn-primary {
-      background: linear-gradient(180deg, var(--accent-bright), var(--accent));
-      color: #fff;
-      box-shadow: 0 10px 30px -8px var(--accent-glow);
-    }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 34px -8px var(--accent-glow); }
-    .btn-line { border: 1px solid var(--line); color: var(--ink); }
-    .btn-line:hover { border-color: var(--gold-line); color: var(--gold); }
-    .btn-sm { padding: 10px 18px; font-size: 13.5px; }
-
-    .eyebrow {
-      display: block;
-      font-family: 'Newsreader', serif;
-      font-style: italic;
-      font-size: 16px;
-      color: var(--gold);
-      margin-bottom: 16px;
-    }
-
-    /* ---------- NAV ---------- */
-    .nav-wrap {
-      position: sticky; top: 0; z-index: 40;
-      background: rgba(13,13,26,.86);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--line-soft);
-    }
-    .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-family: 'Newsreader', serif; font-weight: 500; font-size: 20px; }
-    .brand .mark {
-      width: 30px; height: 30px; border-radius: 9px;
-      background: linear-gradient(160deg, var(--accent-bright), var(--accent));
-      position: relative; flex-shrink: 0;
-    }
-    .brand .mark::after { content: ''; position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    .nav-links { display: flex; gap: 32px; font-size: 14.5px; color: var(--ink-2); }
-    .nav-links a:hover { color: var(--ink); }
-    @media (max-width: 860px) { .nav-links { display: none; } }
-
-    /* ---------- HERO ---------- */
-    .hero { position: relative; padding: 110px 0 90px; overflow: hidden; }
-    .hero::before {
-      content: '';
-      position: absolute; top: -260px; right: -160px;
-      width: 720px; height: 720px; border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-glow), transparent 68%);
-      filter: blur(10px);
-      pointer-events: none;
-    }
-    .hero::after {
-      content: '';
-      position: absolute; top: 120px; left: -220px;
-      width: 460px; height: 460px; border-radius: 50%;
-      background: radial-gradient(circle, var(--gold-soft), transparent 70%);
-      filter: blur(10px);
-      pointer-events: none;
-    }
-    .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 60px; align-items: center; }
-    @media (max-width: 940px) { .hero-grid { grid-template-columns: 1fr; } }
-
-    .hero h1 { font-size: clamp(38px, 5vw, 60px); line-height: 1.08; font-weight: 500; }
-    .hero .lead { margin-top: 22px; font-size: 17px; max-width: 44ch; }
-    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 32px; }
-    .hero-note { margin-top: 18px; font-size: 13.5px; color: var(--ink-3); }
-
-    .compat { margin-top: 46px; padding-top: 26px; border-top: 1px solid var(--line-soft); }
-    .compat .label { display: block; font-size: 12.5px; color: var(--ink-3); margin-bottom: 12px; font-style: italic; font-family: 'Newsreader', serif; }
-    .compat-apps { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--ink-2); }
-
-    /* hero visual: soft portrait dissolve */
-    .portrait-card {
-      position: relative;
-      border-radius: 28px;
-      padding: 1px;
-      background: linear-gradient(160deg, rgba(231,185,120,.35), rgba(108,99,255,.35));
-    }
-    .portrait-inner {
-      border-radius: 27px;
-      background: linear-gradient(175deg, var(--panel-warm), var(--bg-2));
-      padding: 30px;
-    }
-    .portrait-frame {
-      aspect-ratio: 4/3.1;
-      border-radius: 18px;
-      position: relative;
-      overflow: hidden;
-      background: radial-gradient(circle at 50% 40%, #201c38, #100e1e 78%);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .portrait-frame svg { width: 62%; height: 62%; }
-    .glow-ring { position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 60px rgba(108,99,255,.18); pointer-events: none; }
-    .portrait-caption { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; font-size: 13px; color: var(--ink-3); }
-    .portrait-caption .live { display: flex; align-items: center; gap: 7px; color: var(--gold); }
-    .portrait-caption .live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 1.8s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
-
-    /* ---------- SECTION SHELL ---------- */
-    .section { padding: 100px 0; }
-    .section-head { max-width: 620px; margin: 0 auto 56px; text-align: center; }
-    .section-head h2 { font-size: clamp(28px, 3.4vw, 38px); line-height: 1.2; font-weight: 500; }
-    .section-head p { margin-top: 16px; font-size: 15.5px; }
-    .section-head.left { text-align: left; margin: 0 0 52px; }
-
-    /* ---------- HOW IT WORKS ---------- */
-    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-    @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
-    .step {
-      padding: 34px 30px;
-      border-radius: 20px;
-      background: linear-gradient(175deg, var(--panel-warm), var(--bg-2));
-      border: 1px solid var(--line);
-    }
-    .step .num { font-family: 'Newsreader', serif; font-style: italic; font-size: 32px; color: var(--gold); margin-bottom: 18px; display: block; }
-    .step h3 { font-size: 19px; margin-bottom: 10px; font-weight: 500; }
-    .step p { font-size: 14.5px; }
-
-    /* ---------- MODELS ---------- */
-    .models { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-    @media (max-width: 760px) { .models { grid-template-columns: 1fr; } }
-    .model {
-      display: flex; gap: 18px;
-      padding: 26px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.015);
-      border: 1px solid var(--line);
-    }
-    .model .glyph {
-      width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px;
-      background: linear-gradient(160deg, rgba(108,99,255,.22), rgba(231,185,120,.14));
-      border: 1px solid var(--line);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gold);
-    }
-    .model h4 { font-size: 17px; margin-bottom: 8px; font-weight: 500; }
-    .model p { font-size: 14px; }
-    .model .rate { display: inline-block; margin-top: 12px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line-soft); padding-top: 10px; }
-
-    /* ---------- FEATURES ---------- */
-    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-soft); border-radius: 20px; overflow: hidden; border: 1px solid var(--line); }
-    @media (max-width: 860px) { .feat-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .feat-grid { grid-template-columns: 1fr; } }
-    .feat { background: var(--bg-2); padding: 28px 26px; }
-    .feat h4 { font-size: 15.5px; margin-bottom: 8px; font-weight: 500; }
-    .feat p { font-size: 13.5px; }
-
-    /* ---------- PRICING ---------- */
-    .live-flag { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: var(--ink-3); margin-bottom: 34px; font-style: italic; font-family: 'Newsreader', serif; }
-    .live-flag .dot { width: 6px; height: 6px; border-radius: 50%; background: #7fd88f; box-shadow: 0 0 0 3px rgba(127,216,143,.16); }
-
-    .price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-    @media (max-width: 980px) { .price-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .price-grid { grid-template-columns: 1fr; } }
-
-    .plan {
-      border-radius: 20px;
-      padding: 30px 26px;
-      background: linear-gradient(180deg, var(--panel-warm), var(--bg-2));
-      border: 1px solid var(--line);
-      display: flex; flex-direction: column;
-    }
-    .plan.popular {
-      border: 1px solid var(--gold-line);
-      background: linear-gradient(180deg, rgba(231,185,120,.09), var(--bg-2) 60%);
-      box-shadow: 0 26px 60px -28px rgba(231,185,120,.35);
-    }
-    .plan .pname { font-size: 19px; font-weight: 500; margin-bottom: 4px; }
-    .plan .badge { display: inline-block; font-size: 11px; color: var(--gold); border: 1px solid var(--gold-line); border-radius: 100px; padding: 3px 10px; margin-bottom: 14px; }
-    .plan .price { display: flex; align-items: baseline; gap: 4px; margin: 6px 0 4px; }
-    .plan .price .amt { font-family: 'Newsreader', serif; font-size: 36px; font-weight: 500; }
-    .plan .price .cur { font-size: 14px; color: var(--ink-3); }
-    .plan .credits { font-size: 13.5px; color: var(--ink-2); margin-bottom: 20px; }
-    .plan ul { margin: 0 0 24px; padding: 0; list-style: none; flex-grow: 1; }
-    .plan li { font-size: 13.5px; color: var(--ink-2); padding: 8px 0; border-top: 1px solid var(--line-soft); }
-    .plan li:first-child { border-top: none; }
-
-    .price-skel { height: 240px; border-radius: 20px; background: linear-gradient(100deg, var(--panel) 30%, var(--panel-warm) 50%, var(--panel) 70%); background-size: 200% 100%; animation: shimmer 1.6s infinite; border: 1px solid var(--line); }
-    @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
-    .price-error { grid-column: 1 / -1; text-align: center; padding: 34px; border: 1px dashed var(--line); border-radius: 18px; color: var(--ink-3); font-size: 14px; }
-
-    /* ---------- CALCULATOR ---------- */
-    .calc-wrap {
-      margin-top: 50px;
-      border-radius: 22px;
-      padding: 38px;
-      background: linear-gradient(160deg, rgba(108,99,255,.08), var(--bg-2) 65%);
-      border: 1px solid var(--line);
-      display: grid; grid-template-columns: 1.3fr 1fr; gap: 44px; align-items: center;
-    }
-    @media (max-width: 820px) { .calc-wrap { grid-template-columns: 1fr; padding: 28px; } }
-    .calc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: var(--ink-2); }
-    .calc-row strong { color: var(--ink); font-size: 15px; }
-    .calc-slider { width: 100%; -webkit-appearance: none; height: 4px; border-radius: 4px; background: var(--line); outline: none; margin: 16px 0 22px; }
-    .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); cursor: pointer; box-shadow: 0 0 0 6px rgba(231,185,120,.16); }
-    .calc-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; }
-    .calc-out { font-size: 13.5px; color: var(--ink-2); }
-    .calc-out .num { color: var(--ink); font-weight: 600; }
-
-    .calc-rec { border-radius: 18px; padding: 26px; text-align: center; background: rgba(231,185,120,.06); border: 1px solid var(--gold-line); }
-    .calc-rec .lbl { font-size: 12.5px; color: var(--ink-3); margin-bottom: 10px; font-style: italic; font-family: 'Newsreader', serif; }
-    .calc-rec .name { font-family: 'Newsreader', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; }
-    .calc-rec .detail { font-size: 13px; color: var(--ink-2); margin-bottom: 18px; }
-
-    /* ---------- DISCLOSURE ---------- */
-    .disclosure {
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: linear-gradient(160deg, rgba(255,255,255,.02), transparent);
-      padding: 40px 44px;
-      display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: flex-start;
-    }
-    @media (max-width: 640px) { .disclosure { grid-template-columns: 1fr; padding: 30px; } }
-    .disclosure .glyph {
-      width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
-      background: var(--gold-soft); border: 1px solid var(--gold-line);
-      display: flex; align-items: center; justify-content: center; color: var(--gold);
-    }
-    .disclosure h3 { font-size: 20px; margin-bottom: 12px; font-weight: 500; }
-    .disclosure p { font-size: 14.5px; color: var(--ink-2); margin-bottom: 12px; }
-    .disclosure p:last-child { margin-bottom: 0; }
-    .disclosure a { color: var(--gold); text-decoration: underline; text-underline-offset: 2px; }
-
-    /* ---------- CTA ---------- */
-    .cta-band { padding: 90px 0; text-align: center; position: relative; overflow: hidden; }
-    .cta-band::before {
-      content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%);
-      width: 640px; height: 640px; border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-glow), transparent 68%);
-      filter: blur(10px); pointer-events: none;
-    }
-    .cta-band .inner { position: relative; }
-    .cta-band h2 { font-size: clamp(28px, 3.6vw, 42px); margin-bottom: 18px; font-weight: 500; }
-    .cta-band p { max-width: 46ch; margin: 0 auto 32px; font-size: 15.5px; }
-
-    /* ---------- FOOTER ---------- */
-    footer { padding: 60px 0 34px; border-top: 1px solid var(--line-soft); }
-    .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-    @media (max-width: 700px) { .foot-grid { grid-template-columns: 1fr; gap: 28px; } }
-    .foot-brand p { margin-top: 14px; font-size: 14px; max-width: 32ch; }
-    .foot-col h5 { font-size: 13px; color: var(--gold); font-style: italic; font-family: 'Newsreader', serif; font-weight: 400; margin-bottom: 16px; }
-    .foot-col a { display: block; font-size: 14px; color: var(--ink-2); margin-bottom: 11px; }
-    .foot-col a:hover { color: var(--ink); }
-    .foot-bot { display: flex; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-4); flex-wrap: wrap; gap: 10px; }
-
-    @media (prefers-reduced-motion: reduce) {
-      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
-    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:95px}
+    body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    body::before{content:"";pointer-events:none;position:fixed;inset:0;z-index:-1;background-image:radial-gradient(#C9EF9C09 1px,transparent 1px);background-size:26px 26px;mask-image:linear-gradient(to bottom,#0007,transparent 76%)}
+    a{text-decoration:none;color:inherit} button,input{font:inherit}button{cursor:pointer}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .container{width:min(var(--width),calc(100% - 48px));margin:auto}
+    .skip{position:absolute;top:-100px;left:10px;z-index:100;background:var(--accent);color:var(--on-accent);padding:10px}.skip:focus{top:10px}
+    .nav-wrap{position:sticky;top:0;z-index:50;border-bottom:1px solid #ffffff10;background:#101313e8;backdrop-filter:blur(16px)}
+    .nav{height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .logo{display:inline-flex;align-items:center;gap:11px;font-weight:800;font-size:21px;letter-spacing:-1.1px}
+    .logo-mark{width:35px;height:35px;display:grid;place-items:center;border:1px solid #C9EF9C50;background:var(--accent-dim);border-radius:11px;color:var(--accent)}
+    .logo-mark svg{width:23px;height:23px}.logo .ai{color:var(--accent)}
+    .nav-links{display:flex;align-items:center;gap:29px;color:var(--secondary);font-size:13px;font-weight:600}.nav-links a:hover,.footer a:hover{color:var(--accent)}
+    .nav-actions{display:flex;align-items:center;gap:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:12px 20px;border:1px solid transparent;border-radius:11px;font-size:13px;font-weight:700;transition:transform .2s,background .2s,border-color .2s,color .2s;white-space:nowrap}
+    .btn:hover{transform:translateY(-2px)}.btn-primary{color:var(--on-accent);background:var(--accent)}.btn-primary:hover{background:var(--accent-light)}
+    .btn-outline{border-color:var(--border);background:#ffffff05;color:var(--text)}.btn-outline:hover{border-color:#C9EF9C80;background:var(--accent-dim)}
+    .btn-small{min-height:39px;padding:8px 15px}.menu-toggle{display:none;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:10px;width:40px;height:40px;font-size:20px}
+    .eyebrow{display:inline-flex;gap:9px;align-items:center;color:var(--accent);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px}
+    .eyebrow::before{content:"";width:17px;height:1px;background:var(--accent)}
+    h1,h2,h3,p{margin-top:0}h1,h2,h3{letter-spacing:-.045em;line-height:1.13}h1{font-size:clamp(48px,5.5vw,80px);font-weight:700;margin:24px 0}h2{font-size:clamp(33px,4vw,51px);font-weight:650;margin:14px 0 17px}h3{font-size:19px;font-weight:650;letter-spacing:-.025em;margin-bottom:10px}
+    p{color:var(--secondary)}.highlight{color:var(--accent)}
+    .hero{padding:96px 0 104px;position:relative;overflow:hidden}
+    .hero:after{content:"";position:absolute;z-index:-1;width:680px;height:680px;right:-290px;top:-230px;background:radial-gradient(circle,#C9EF9C16,transparent 68%);pointer-events:none}
+    .hero-grid{display:grid;grid-template-columns:1.03fr .97fr;align-items:center;gap:65px}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;background:var(--accent-dim);color:var(--accent-light);border:1px solid #C9EF9C28;border-radius:100px;font-size:11px;font-weight:700}
+    .pulse{width:7px;height:7px;background:var(--accent);box-shadow:0 0 0 4px #C9EF9C15;border-radius:50%}
+    .hero-desc{font-size:16px;line-height:1.8;max-width:505px}.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin:31px 0 26px}
+    .hero-meta{display:flex;align-items:center;flex-wrap:wrap;gap:11px 20px;color:var(--muted);font-size:12px}.hero-meta span::before{content:"✓";color:var(--accent);font-weight:800;margin-right:7px}
+    .preview-shell{background:linear-gradient(145deg,#27362b,#111614 40%,#29362c);border:1px solid #C9EF9C35;border-radius:24px;padding:12px;box-shadow:0 35px 90px #0007,0 0 90px #C9EF9C08;position:relative}
+    .preview-bar{height:42px;display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--surface);border-radius:13px 13px 0 0;border:1px solid var(--border);border-bottom:0}
+    .window-dot{width:8px;height:8px;border-radius:50%;background:#65736a}.window-dot:first-child{background:#CE786B}.window-dot:nth-child(2){background:#E3C286}.window-dot:nth-child(3){background:#A9D8AE}.preview-bar .bar-title{font-size:10px;letter-spacing:.12em;color:var(--muted);margin-left:auto;text-transform:uppercase}
+    .preview-body{padding:17px;background:#0F1511;border:1px solid var(--border);border-radius:0 0 13px 13px}
+    .preview-labels{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+    .live-label{color:var(--accent);display:flex;align-items:center;gap:8px}.live-label::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+    .camera-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .camera-panel{aspect-ratio:4/5;background:radial-gradient(ellipse at 50% 30%,#2D3C2D,#161E19 64%,#0D120F);border-radius:11px;position:relative;overflow:hidden;border:1px solid #ffffff18;display:flex;align-items:flex-end;justify-content:center}
+    .camera-panel.output{background:radial-gradient(ellipse at 50% 30%,#405D3B,#17221a 62%,#101511);border-color:#C9EF9C44}
+    .avatar{position:absolute;bottom:-6%;width:96%;height:97%;max-width:250px;opacity:.88}
+    .panel-label{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;gap:5px;font-size:10px;color:var(--text);font-weight:700;letter-spacing:.03em;z-index:2}
+    .panel-label span{background:#0B100EdB;border:1px solid #ffffff23;border-radius:6px;padding:4px 7px}
+    .preview-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:13px;gap:12px}.stream-chip{background:var(--accent-dim);color:var(--accent);padding:5px 9px;border-radius:6px;font-size:10px;font-weight:700}
+    .trust-strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:21px 0;background:#ffffff02}
+    .trust-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.trust-title{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:700}.trust-items{display:flex;gap:25px;flex-wrap:wrap;color:var(--secondary);font-size:12px;font-weight:700}
+    section.section{padding:106px 0}.section-heading{max-width:670px;margin-bottom:43px}.section-heading p{max-width:550px;line-height:1.8}.section-heading.center{text-align:center;margin-left:auto;margin-right:auto}.section-heading.center p{margin-left:auto;margin-right:auto}
+    .step-grid,.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.step-card,.feature-card{background:var(--card);border:1px solid var(--border);padding:29px;border-radius:17px;transition:border-color .2s,transform .2s}.step-card:hover,.feature-card:hover{border-color:#C9EF9C5c;transform:translateY(-3px)}
+    .step-no{display:grid;place-items:center;width:37px;height:37px;border-radius:10px;background:var(--accent-dim);color:var(--accent);font-size:12px;font-weight:800;margin-bottom:28px}.step-card p,.feature-card p{font-size:13px;line-height:1.8;margin-bottom:0}
+    .feature-card{min-height:208px}.feature-icon{font-size:22px;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--accent-dim);color:var(--accent);margin-bottom:19px}
+    .split{display:grid;grid-template-columns:.9fr 1.1fr;gap:75px;align-items:center}.workflow{display:grid;gap:12px}.workflow-row{display:flex;align-items:center;gap:16px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:14px}.workflow-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;background:var(--accent-dim);color:var(--accent);font-size:19px}.workflow-row strong{display:block;font-size:13px}.workflow-row small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+    .pricing-bg{background:linear-gradient(#141A17,#101313);border-block:1px solid var(--border)}.price-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.plan{position:relative;display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:22px 17px;min-width:0}.plan.popular{border:1px solid var(--accent);background:linear-gradient(160deg,#253421,#191E1D 60%)}.plan-badge{font-size:10px;background:var(--accent);color:var(--on-accent);border-radius:5px;padding:5px 7px;font-weight:800;align-self:flex-start}.plan h3{font-size:14px;margin:0;letter-spacing:0}.plan .price{font-size:33px;font-weight:800;letter-spacing:-1.5px;line-height:1.1}.plan .price span{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}.plan .duration{font-size:15px;font-weight:700;color:var(--accent)}.plan .plan-desc{font-size:12px;line-height:1.55;color:var(--muted);min-height:38px;margin:0}.plan .credits{color:var(--secondary);font-size:11px}.plan .btn{margin-top:auto;font-size:12px;padding:9px 10px;min-height:41px}.pricing-note{font-size:11px;color:var(--muted);margin:19px 0 0;line-height:1.7}
+    .calculator{margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:28px;display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:center}.calculator h3{margin:0 0 8px}.calculator p{font-size:12px;margin-bottom:17px}.calc-top{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--secondary);margin-bottom:13px}.calc-top strong{color:var(--accent)}input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}.calc-output{background:var(--card);border:1px solid var(--border);padding:18px 20px;border-radius:12px}.calc-output .label{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.13em}.calc-output strong{font-size:22px;color:var(--text);display:block;margin:7px 0 3px;line-height:1.2}.calc-output .details{font-size:12px;color:var(--secondary)}.calc-output .btn{margin-top:15px;width:100%}
+    .responsible{border:1px solid var(--border);background:linear-gradient(100deg,#1D281E,#161C18);border-radius:18px;padding:35px;display:flex;align-items:center;justify-content:space-between;gap:35px}.responsible h3{font-size:23px}.responsible p{max-width:690px;margin:0;font-size:13px;line-height:1.8}.responsible a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+    .cta{padding:77px 0;background:radial-gradient(ellipse at 65% 5%,#C9EF9C18,transparent 60%),var(--accent-dim);border-block:1px solid #C9EF9C25}.cta-inner{text-align:center;max-width:660px}.cta h2{margin:10px 0 15px}.cta p{margin-bottom:25px}
+    .footer{padding:58px 0 23px}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px}.footer h4{font-size:12px;color:var(--text);margin:0 0 14px}.footer-links{display:grid;gap:8px}.footer a,.footer p{color:var(--muted);font-size:12px}.footer .brand-text{max-width:310px;margin-top:14px}.footer-bottom{border-top:1px solid var(--border);padding-top:20px;margin-top:50px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:11px}
+    @media(max-width:1100px){.price-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero-grid{gap:32px}h1{font-size:clamp(45px,5vw,62px)}}
+    @media(max-width:820px){.nav-links{display:none;position:absolute;top:77px;left:0;right:0;background:var(--surface);padding:20px 24px;border-bottom:1px solid var(--border);flex-direction:column;align-items:flex-start;gap:18px}.nav-links.open{display:flex}.menu-toggle{display:grid;place-items:center}.hero-grid,.split{grid-template-columns:1fr}.hero{padding:75px 0}.preview-shell{max-width:560px;margin:auto}.step-grid,.feature-grid{grid-template-columns:repeat(2,1fr)}.calculator{grid-template-columns:1fr}.footer-grid{grid-template-columns:1.5fr 1fr 1fr;gap:20px}}
+    @media(max-width:580px){.container{width:calc(100% - 34px)}.nav{height:70px}.nav-links{top:69px}.nav-actions .btn-small{display:none}.hero{padding:60px 0 72px}h1{font-size:clamp(43px,11vw,58px)}.hero-desc{font-size:14px}.hero-buttons .btn{width:100%}.trust-inner{align-items:flex-start}.trust-items{gap:10px 18px}section.section{padding:75px 0}.step-grid,.feature-grid,.price-grid{grid-template-columns:1fr}.plan{padding:24px}.plan .plan-desc{min-height:0}.camera-grid{gap:8px}.preview-shell{padding:8px}.preview-body{padding:10px}.responsible{display:block;padding:25px}.responsible .btn{margin-top:20px}.footer-grid{grid-template-columns:1fr 1fr;gap:32px}.footer-grid>div:first-child{grid-column:1/-1}.footer-bottom{flex-direction:column;gap:5px}.calculator{padding:18px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
   </style>
 </head>
-
 <body>
-
-  <!-- ============ NAV ============ -->
-  <div class="nav-wrap">
-    <div class="container nav">
-      <a href="#" class="brand"><span class="mark"></span>camifyai</a>
-      <div class="nav-links">
-        <a href="#how">How it works</a>
-        <a href="#models">Models</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#disclosure">Acceptable use</a>
-      </div>
-      <a href="/download/?platform=windows" class="btn btn-primary btn-sm">Download</a>
-    </div>
-  </div>
-
-  <!-- ============ HERO ============ -->
-  <section class="hero">
-    <div class="container hero-grid">
-      <div>
-        <span class="eyebrow">A camera that becomes someone else</span>
-        <h1>Your face. Or <em>any</em> face. Live, on camera.</h1>
-        <p class="lead">camifyai turns a single portrait into a moving, talking camera feed in real time. It shows up as a webcam in whatever app you already use — no exporting, no render queue, no waiting.</p>
-        <div class="hero-cta">
-          <a href="/download/?platform=windows" class="btn btn-primary">Download for Windows</a>
-        </div>
-        <p class="hero-note">Free to start · billed by the second, not the month.</p>
-
-        <div class="compat">
-          <span class="label">Runs quietly underneath</span>
-          <div class="compat-apps">
-            <span>Zoom</span><span>Google Meet</span><span>Microsoft Teams</span><span>Discord</span><span>Slack Huddles</span><span>OBS</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="portrait-card">
-        <div class="portrait-inner">
-          <div class="portrait-frame">
-            <div class="glow-ring"></div>
-            <svg viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="40" r="19" stroke="#E7B978" stroke-width="1.1" opacity=".9"/>
-              <path d="M20 88c0-17 13.5-30 30-30s30 13 30 30" stroke="#E7B978" stroke-width="1.1" opacity=".9"/>
-              <circle cx="43" cy="38" r="1.6" fill="#9089FF"/>
-              <circle cx="57" cy="38" r="1.6" fill="#9089FF"/>
-              <path d="M42 48q8 6 16 0" stroke="#9089FF" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="portrait-caption">
-            <span class="live"><span class="dot"></span>Streaming live</span>
-            <span>· 1080p</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ HOW IT WORKS ============ -->
-  <section class="section" id="how">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">How it works</span>
-        <h2>Set up once. Go live in seconds after that.</h2>
-        <p>Everything happens through the desktop app — no separate uploads, no browser tab to babysit.</p>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <span class="num">One</span>
-          <h3>Add a face</h3>
-          <p>A clear photo is enough to start. Build a small library of looks you can switch between mid-call.</p>
-        </div>
-        <div class="step">
-          <span class="num">Two</span>
-          <h3>Pick a live model</h3>
-          <p>Edit, restyle, drive an avatar, or sync a mouth to your voice — four live models, one per session.</p>
-        </div>
-        <div class="step">
-          <span class="num">Three</span>
-          <h3>Select it as your camera</h3>
-          <p>camifyai registers as a webcam device on your machine. Pick it in Zoom, Meet, Teams — you're on.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ MODELS ============ -->
-  <!--<section class="section" id="models">-->
-  <!--  <div class="container">-->
-  <!--    <div class="section-head">-->
-  <!--      <span class="eyebrow">Four live models</span>-->
-  <!--      <h2>Built for a specific kind of transformation.</h2>-->
-  <!--      <p>Every model streams at the same rate — pick the one that fits the shot, not the budget.</p>-->
-  <!--    </div>-->
-  <!--    <div class="models">-->
-  <!--      <div class="model">-->
-  <!--        <div class="glyph"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>-->
-  <!--        <div>-->
-  <!--          <h4>Lucy Edit Live</h4>-->
-  <!--          <p>Change hair, clothing, background or lighting in your feed, frame by frame, without touching the underlying take.</p>-->
-  <!--          <span class="rate">2 credits per second</span>-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--      <div class="model">-->
-  <!--        <div class="glyph"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4zM4 12h16M12 4v16"/></svg></div>-->
-  <!--        <div>-->
-  <!--          <h4>Lucy Restyle Live</h4>-->
-  <!--          <p>Re-render your whole feed into a new visual style — illustrated, animated, or another character entirely.</p>-->
-  <!--          <span class="rate">2 credits per second</span>-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--      <div class="model">-->
-  <!--        <div class="glyph"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>-->
-  <!--        <div>-->
-  <!--          <h4>Avatar Live</h4>-->
-  <!--          <p>Drive a fully separate character with your movement and expressions — your face never appears on the wire.</p>-->
-  <!--          <span class="rate">2 credits per second</span>-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--      <div class="model">-->
-  <!--        <div class="glyph"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>-->
-  <!--        <div>-->
-  <!--          <h4>LipSync Live</h4>-->
-  <!--          <p>Keep a still image or character's mouth locked to your voice, in real time, for a talking-portrait feed.</p>-->
-  <!--          <span class="rate">2 credits per second</span>-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--    </div>-->
-  <!--  </div>-->
-  <!--</section>-->
-
-  <!-- ============ FEATURES ============ -->
-  <section class="section" id="features">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Under the hood</span>
-        <h2>Made to sit quietly underneath a real call.</h2>
-      </div>
-      <div class="feat-grid">
-        <div class="feat"><h4>Streamed, not rendered</h4><p>Frames go out as they're generated. No export step, no processing screen between you and the call.</p></div>
-        <div class="feat"><h4>A real virtual webcam</h4><p>Once running, camifyai is a camera source at the OS level — any app that opens a webcam can open camifyai.</p></div>
-        <div class="feat"><h4>Pay by the second</h4><p>Credits deduct while you're actually streaming, in ten-second heartbeats. Close the call and billing stops with it.</p></div>
-        <div class="feat"><h4>Watermarked by default</h4><p>Every stream carries a visible watermark unless the account has paid the one-time fee to remove it — origin stays traceable.</p></div>
-        <div class="feat"><h4>Usage you can audit</h4><p>Every session lands in a usage log with the model, duration and credits spent — nothing shows up as a surprise.</p></div>
-        <div class="feat"><h4>Pay however works for you</h4><p>Top up with a card via Flutterwave or with crypto — the checkout flow is the same either way.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ PRICING (dynamic) ============ -->
-  <section class="section" id="pricing">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Credits, not subscriptions</span>
-        <h2>Buy a pack. Burn it when you stream.</h2>
-        <p>One credit is one second of live streaming across any model. Credits don't expire.</p>
-      </div>
-
-      <div class="live-flag"><span class="dot"></span>Live pricing, pulled from the camifyai API</div>
-
-      <div class="price-grid" id="priceGrid">
-        <div class="price-skel"></div>
-        <div class="price-skel"></div>
-        <div class="price-skel"></div>
-        <div class="price-skel"></div>
-      </div>
-
-      <div class="calc-wrap">
-        <div>
-          <div class="calc-row"><span>How many minutes will you stream a month?</span><strong id="minVal">30 min</strong></div>
-          <input type="range" id="minSlider" class="calc-slider" min="1" max="600" value="30" step="1" />
-          <div class="calc-out">You'll need <span class="num" id="creditsOut">3,600</span> credits, at 2 credits per second.</div>
-        </div>
-        <div class="calc-rec">
-          <div class="lbl">Best fit</div>
-          <div class="name" id="recName">—</div>
-          <div class="detail" id="recDetail">Loading live pricing…</div>
-          <a href="#pricing" class="btn btn-primary btn-sm" id="recBtn">See pricing</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ DISCLOSURE ============ -->
-  <section class="section" id="disclosure" style="padding-top:0">
-    <div class="container">
-      <div class="disclosure">
-        <div class="glyph">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
-        </div>
-        <div>
-          <h3>Use it on yourself, or with permission.</h3>
-          <p>camifyai is built for calls, streams and content where everyone involved knows a live AI camera is being used. Don't upload someone else's likeness without their consent, and don't use the app to impersonate a real person, mislead someone about who they're talking to, or produce sexual, harassing, or defamatory content of any real individual.</p>
-          <p>camifyai must not be used for any illegal purpose — including fraud, identity theft, evading a platform's ban, or generating content involving minors. Every stream carries a watermark by default so origin stays traceable, and accounts found violating this are suspended and may be reported to the relevant authorities.</p>
-          <p>Full terms live in our <a href="/consent/">Consent Policy</a> and <a href="/terms/">Terms of Use</a>.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CTA ============ -->
-  <section class="cta-band">
-    <div class="container inner">
-      <h2>Your next call could look like anything.</h2>
-      <p>Download the desktop app, add a face, and go live in your next meeting.</p>
-      <a href="/download/?platform=windows" class="btn btn-primary">Download for Windows</a>
-    </div>
-  </section>
-
-  <!-- ============ FOOTER ============ -->
-  <footer>
-    <div class="container">
-      <div class="foot-grid">
-        <div class="foot-brand">
-          <a href="#" class="brand"><span class="mark"></span>camifyai</a>
-          <p>A real-time AI camera for the calls, streams, and recordings you're already making.</p>
-        </div>
-        <div class="foot-col">
-          <h5>Legal</h5>
-          <a href="/terms/">Terms of Use</a>
-          <a href="/privacy/">Privacy Policy</a>
-          <a href="/consent/">Consent Policy</a>
-        </div>
-        <div class="foot-col">
-          <h5>Support</h5>
-          <a href="mailto:support@streamaicam.com">support@streamaicam.com</a>
-        </div>
-      </div>
-      <div class="foot-bot">
-        <div>© 2026 camifyai</div>
-        <div>streamaicam.com</div>
-      </div>
-    </div>
-  </footer>
-
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="nav-wrap">
+    <nav class="nav container" aria-label="Main navigation">
+      <a href="/" class="logo" aria-label="CamifyAI home"><span class="logo-mark" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="5" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.3" stroke="currentColor" stroke-width="1.7"/><path d="M7 3v2m10-2v2" stroke="currentColor" stroke-width="1.7"/></svg></span><span>camify<span class="ai">ai</span></span></a>
+      <div class="nav-links" id="navLinks"><a href="#how">How it works</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#responsible">Responsible use</a></div>
+      <div class="nav-actions"><a class="btn btn-primary btn-small" href="/download/?platform=windows">Download app <span aria-hidden="true">↗</span></a><button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle navigation" aria-controls="navLinks" aria-expanded="false">☰</button></div>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero"><div class="container hero-grid">
+      <div><div class="pill"><span class="pulse"></span> LIVE AI CAMERA STUDIO</div><h1>Show up as <span class="highlight">another you.</span> In real time.</h1><p class="hero-desc">Turn a portrait into your live AI look. Move naturally, see the result instantly, and bring the output into your content or OBS workflow.</p><div class="hero-buttons"><a href="/download/?platform=windows" class="btn btn-primary">Get CamifyAI <span aria-hidden="true">↗</span></a><a href="#how" class="btn btn-outline">See how it works <span aria-hidden="true">↓</span></a></div><div class="hero-meta"><span>Flexible prepaid time</span><span>Live AI transformation</span><span>OBS-ready output</span></div></div>
+      <div class="preview-shell" aria-label="Illustration of the CamifyAI streaming studio"><div class="preview-bar"><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span><span class="bar-title">CAMIFYAI · LIVE STUDIO</span></div><div class="preview-body"><div class="preview-labels"><span>CAMERA PREVIEW</span><span class="live-label">AI OUTPUT READY</span></div><div class="camera-grid">
+        <div class="camera-panel"><svg class="avatar" viewBox="0 0 220 290" aria-hidden="true"><defs><linearGradient id="personA" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#738578"/><stop offset="1" stop-color="#34463B"/></linearGradient></defs><ellipse cx="110" cy="285" rx="114" ry="97" fill="url(#personA)"/><path d="M81 167h58v60H81z" fill="#718676"/><ellipse cx="110" cy="114" rx="57" ry="74" fill="#93A697"/><path d="M53 109q3-96 61-94 71 0 56 100l-15-27q-20-42-82-22z" fill="#27372E"/><path d="M79 130h17m29 0h17" stroke="#27372E" stroke-width="3" stroke-linecap="round"/><path d="M98 167q14 10 28 0" stroke="#476456" stroke-width="3" stroke-linecap="round" fill="none"/></svg><div class="panel-label"><span>01 · SOURCE</span></div></div>
+        <div class="camera-panel output"><svg class="avatar" viewBox="0 0 220 290" aria-hidden="true"><defs><linearGradient id="personB" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#C9EF9C"/><stop offset="1" stop-color="#4F8A58"/></linearGradient></defs><ellipse cx="110" cy="285" rx="114" ry="97" fill="#405E41"/><path d="M83 164h54v56H83z" fill="#B4D4A0"/><ellipse cx="110" cy="111" rx="58" ry="73" fill="url(#personB)"/><path d="M52 104q0-88 62-91 70 2 56 94l-17-26q-20-37-76-15z" fill="#213929"/><path d="M80 127h17m29 0h17" stroke="#2F5735" stroke-width="3" stroke-linecap="round"/><path d="M98 165q12 10 26 0" stroke="#2F5735" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="170" cy="53" r="22" fill="#C9EF9C25" stroke="#C9EF9C60"/><path d="M160 53h20m-10-10v20" stroke="#C9EF9C" stroke-width="2"/></svg><div class="panel-label"><span>02 · TRANSFORMED</span><span style="color:#C9EF9C">● LIVE</span></div></div>
+      </div><div class="preview-foot"><span>Illustrative studio preview</span><span class="stream-chip">REAL-TIME MODE</span></div></div></div>
+    </div></section>
+    <div class="trust-strip"><div class="container trust-inner"><span class="trust-title">Designed for your workflow</span><div class="trust-items"><span>AI live video</span><span>Portrait reference</span><span>OBS pop-out</span><span>Pay for the time you use</span></div></div></div>
+    <section class="section" id="how"><div class="container"><div class="section-heading"><span class="eyebrow">THREE SIMPLE STEPS</span><h2>From your camera to <span class="highlight">your next look.</span></h2><p>A straightforward workflow that puts the creative controls in your hands.</p></div><div class="step-grid"><article class="step-card"><span class="step-no">01</span><h3>Choose your look</h3><p>Upload a portrait you own or have permission to use, then add an optional prompt to describe the result you want.</p></article><article class="step-card"><span class="step-no">02</span><h3>Start your camera</h3><p>Allow camera access and launch the live session from the CamifyAI studio. See the source and generated output side by side.</p></article><article class="step-card"><span class="step-no">03</span><h3>Create or stream</h3><p>Use the dedicated OBS pop-out to capture the AI output for your recording or broadcasting setup.</p></article></div></div></section>
+    <section class="section" style="padding-top:0" id="features"><div class="container split"><div><span class="eyebrow">BUILT AROUND YOU</span><h2>Creative control without the <span class="highlight">complexity.</span></h2><p>Work with your live camera feed, adjust prompts, and keep your output visible in a focused studio interface.</p><a class="btn btn-outline" href="/download/?platform=windows" style="margin-top:13px">Explore CamifyAI <span aria-hidden="true">↗</span></a></div><div class="workflow"><div class="workflow-row"><span class="workflow-icon" aria-hidden="true">▣</span><div><strong>Live side-by-side preview</strong><small>See your source camera and generated look together.</small></div></div><div class="workflow-row"><span class="workflow-icon" aria-hidden="true">◉</span><div><strong>Reference-image controls</strong><small>Apply a selected portrait or return to text-only mode.</small></div></div><div class="workflow-row"><span class="workflow-icon" aria-hidden="true">↗</span><div><strong>Dedicated OBS output</strong><small>Open the generated feed in its own capture view.</small></div></div><div class="workflow-row"><span class="workflow-icon" aria-hidden="true">◷</span><div><strong>Track your streaming time</strong><small>See remaining credits and session usage as you work.</small></div></div></div></div></section>
+    <section class="section" style="padding-top:0"><div class="container"><div class="feature-grid"><article class="feature-card"><span class="feature-icon" aria-hidden="true">✦</span><h3>AI-powered appearance</h3><p>Experiment with live visual transformations driven by your selected reference and prompt.</p></article><article class="feature-card"><span class="feature-icon" aria-hidden="true">⌘</span><h3>A focused studio</h3><p>Simple controls for starting, stopping and adjusting your live look.</p></article><article class="feature-card"><span class="feature-icon" aria-hidden="true">◷</span><h3>No recurring plan required</h3><p>Choose a prepaid streaming package and use your available time when you need it.</p></article></div></div></section>
+    <section class="section pricing-bg" id="pricing"><div class="container"><div class="section-heading center"><span class="eyebrow">CLEAR, FLEXIBLE PRICING</span><h2>Your time. <span class="highlight">Your choice.</span></h2><p>Purchase streaming credits without committing to a recurring subscription. Every package uses the same transparent hourly rate.</p></div><div class="price-grid" id="priceGrid" aria-live="polite"><p>Loading packages…</p></div><p class="pricing-note">Streaming credit rates: 2 credits per second. Checkout totals may include processor or network fees. Package availability and pricing are confirmed by the live backend; display fallback is informational.</p>
+      <div class="calculator"><div><h3>Find the right amount of time</h3><p>Adjust the minutes below to estimate your streaming credit needs.</p><div class="calc-top"><span>Estimated streaming time</span><strong id="minVal">60 minutes</strong></div><input id="minSlider" aria-label="Streaming minutes" type="range" min="15" max="3000" value="60" step="15"><p style="margin-top:12px">Estimated usage: <strong id="creditsOut" style="color:var(--text)">7,200 credits</strong></p></div><div class="calc-output"><span class="label">Suggested package</span><strong id="recName">Starter</strong><span class="details" id="recDetail">$20 · 1 hour</span><a class="btn btn-primary" id="recBtn" href="#pricing">View package <span aria-hidden="true">↗</span></a></div></div>
+    </div></section>
+    <section class="section" id="responsible"><div class="container"><div class="responsible"><div><span class="eyebrow">CREATE RESPONSIBLY</span><h3>Your creativity. Everyone's consent.</h3><p>Only use portraits and likenesses you own or have the person's permission to use. Do not impersonate, deceive, or harm others. Read our <a href="/consent/">Consent Policy</a> and <a href="/terms/">Terms of Use</a>.</p></div><a href="/consent/" class="btn btn-outline">Read the policy</a></div></div></section>
+    <section class="cta"><div class="container cta-inner"><span class="eyebrow">READY FOR WHAT'S NEXT?</span><h2>Your next look starts <span class="highlight">here.</span></h2><p>Make your camera part of the creative process. Get CamifyAI and start building your live studio workflow.</p><a href="/download/?platform=windows" class="btn btn-primary">Download CamifyAI <span aria-hidden="true">↗</span></a></div></section>
+  </main>
+  <footer class="footer"><div class="container"><div class="footer-grid"><div><a href="/" class="logo"><span class="logo-mark" aria-hidden="true">✦</span><span>camify<span class="ai">ai</span></span></a><p class="brand-text">A more creative way to show up on camera, with live AI transformations and a focused studio workflow.</p></div><div><h4>Explore</h4><div class="footer-links"><a href="#how">How it works</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="/download/?platform=windows">Download</a></div></div><div><h4>Help & legal</h4><div class="footer-links"><a href="/terms/">Terms of use</a><a href="/privacy/">Privacy policy</a><a href="/consent/">Consent policy</a><a href="mailto:support@streamaicam.com">Contact support</a></div></div></div><div class="footer-bottom"><span>© <span id="year">2026</span> CamifyAI. All rights reserved.</span><span>Built for creative, responsible streaming.</span></div></div></footer>
   <script>
-    // ── Live pricing: fetched from the backend, no numbers hardcoded in markup ─
-    // Same-origin by default since the API is served from the same Django app
-    // (see account/urls.py — CreditPacksView at /api/v1/auth/packs/).
-    const API_BASE = '';
-    const PACKS_URL = API_BASE + '/api/v1/auth/packs/';
-    const CREDITS_PER_SECOND = 2; // must match streaming/views.py
+    (() => {
+      'use strict';
+      const menuToggle = document.getElementById('menuToggle');
+      const navLinks = document.getElementById('navLinks');
+      menuToggle.addEventListener('click', () => {
+        const open = navLinks.classList.toggle('open');
+        menuToggle.setAttribute('aria-expanded', String(open));
+        menuToggle.textContent = open ? '×' : '☰';
+      });
+      navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.textContent = '☰';
+      }));
+      document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Used only if the live endpoint is unreachable, so the page still renders.
-    const FALLBACK_PACKS = [
-      { id: 'starter', label: 'Starter', credits: 1000, price_usd: '20.00', popular: false, sessions: 20, streaming_minutes: 8 },
-      { id: 'creator', label: 'Creator', credits: 5000, price_usd: '100.00', popular: false, sessions: 100, streaming_minutes: 42 },
-      { id: 'pro', label: 'Pro', credits: 10000, price_usd: '200.00', popular: true, sessions: 200, streaming_minutes: 83 },
-      { id: 'agency', label: 'Agency', credits: 50000, price_usd: '700.00', popular: false, sessions: 500, streaming_minutes: 400 },
-    ];
-
-    let PACKS = [];
-
-    function renderPricing(packs) {
+      // The API endpoint matches the existing homepage's backend integration.
+      const PACKS_URL = '/api/v1/auth/packs/';
+      const CREDITS_PER_SECOND = 2;
+      const FALLBACK_PACKS = [
+        {id:'starter',label:'Starter',price_usd:'20.00',credits:7200,streaming_minutes:60,popular:false},
+        {id:'creator',label:'Creator',price_usd:'100.00',credits:36000,streaming_minutes:300,popular:false},
+        {id:'pro',label:'Pro',price_usd:'200.00',credits:72000,streaming_minutes:600,popular:true},
+        {id:'agency',label:'Agency',price_usd:'500.00',credits:180000,streaming_minutes:1500,popular:false},
+        {id:'power',label:'Power',price_usd:'1000.00',credits:360000,streaming_minutes:3000,popular:false}
+      ];
+      let packs = FALLBACK_PACKS;
+      let livePricing = false;
       const grid = document.getElementById('priceGrid');
-      if (!packs || !packs.length) {
-        grid.innerHTML = '<div class="price-error">Pricing is temporarily unavailable. Please refresh, or check back shortly.</div>';
-        return;
+      const slider = document.getElementById('minSlider');
+      const minVal = document.getElementById('minVal');
+      const creditsOut = document.getElementById('creditsOut');
+      const recName = document.getElementById('recName');
+      const recDetail = document.getElementById('recDetail');
+      const recBtn = document.getElementById('recBtn');
+      const escapeHtml = (v) => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const hoursLabel = minutes => {
+        const m = Math.floor(Number(minutes) || 0);
+        if (m % 60 === 0 && m >= 60) return `${m / 60} ${m === 60 ? 'hour' : 'hours'}`;
+        if (m > 60) return `${Math.floor(m / 60)}h ${m % 60}m`;
+        return `${m} minutes`;
+      };
+      const normalise = pack => ({
+        id: String(pack.id || ''), label:String(pack.label || ''),
+        price_usd:Number(pack.price_usd), credits:Number(pack.credits),
+        streaming_minutes:Number(pack.streaming_minutes || (Number(pack.credits) / CREDITS_PER_SECOND / 60)),
+        popular:Boolean(pack.popular)
+      });
+      function renderPricing() {
+        const safePacks = packs.filter(p => p.id && Number.isFinite(p.price_usd) && p.price_usd > 0 && Number.isFinite(p.credits) && p.credits > 0);
+        grid.innerHTML = safePacks.map(p => {
+          const id = encodeURIComponent(p.id);
+          const checkoutUrl = livePricing ? `/checkout/?pack=${id}` : '#pricing';
+          return `<article class="plan ${p.popular ? 'popular' : ''}">
+            ${p.popular ? '<span class="plan-badge">POPULAR</span>' : '<span style="height:25px"></span>'}
+            <h3>${escapeHtml(p.label)}</h3>
+            <div class="price">$${p.price_usd.toLocaleString('en-US',{maximumFractionDigits:2})}<span> USD</span></div>
+            <div class="duration">${hoursLabel(p.streaming_minutes)}</div>
+            <p class="plan-desc">Live AI streaming time</p>
+            <div class="credits">${p.credits.toLocaleString('en-US')} credits</div>
+            <a class="btn ${p.popular ? 'btn-primary' : 'btn-outline'}" href="${checkoutUrl}" ${livePricing ? '' : 'aria-disabled="true" title="Live pricing is unavailable"'}>${livePricing ? `Choose ${escapeHtml(p.label)}` : 'View only'}</a>
+          </article>`;
+        }).join('') || '<p>Pricing is temporarily unavailable.</p>';
       }
-      grid.innerHTML = packs.map(p => `
-        <div class="plan ${p.popular ? 'popular' : ''}">
-          ${p.popular ? '<span class="badge">Most picked</span>' : ''}
-          <div class="pname">${p.label}</div>
-          <div class="price"><span class="amt">$${Math.round(parseFloat(p.price_usd))}</span><span class="cur">USD</span></div>
-          <div class="credits">${Number(p.credits).toLocaleString()} credits</div>
-          <ul>
-            <li>~${p.sessions} sessions</li>
-            <li>~${p.streaming_minutes} min of streaming</li>
-            <li>All four live models</li>
-          </ul>
-          <a href="/checkout/?pack=${encodeURIComponent(p.id)}" class="btn btn-line btn-sm">Get ${p.label}</a>
-        </div>
-      `).join('');
-    }
-
-    async function loadPricing() {
-      try {
-        const res = await fetch(PACKS_URL, { headers: { 'Accept': 'application/json' } });
-        if (!res.ok) throw new Error('bad status ' + res.status);
-        const data = await res.json();
-        PACKS = Array.isArray(data) ? data : (data.results || []);
-        if (!PACKS.length) throw new Error('empty packs');
-      } catch (err) {
-        PACKS = FALLBACK_PACKS;
+      function updateCalculator() {
+        const minutes = Number(slider.value);
+        minVal.textContent = hoursLabel(minutes);
+        const required = minutes * 60 * CREDITS_PER_SECOND;
+        creditsOut.textContent = `${required.toLocaleString('en-US')} credits`;
+        const sorted = [...packs].filter(p => p.credits > 0).sort((a,b)=>a.credits-b.credits);
+        const recommended = sorted.find(p => p.credits >= required) || sorted[sorted.length - 1];
+        if (!recommended) return;
+        const qty = Math.ceil(required / recommended.credits);
+        recName.textContent = `${recommended.label}${qty > 1 ? ` × ${qty}` : ''}`;
+        recDetail.textContent = `$${(recommended.price_usd * qty).toLocaleString('en-US')} · ${hoursLabel(recommended.streaming_minutes * qty)}`;
+        recBtn.href = livePricing ? `/checkout/?pack=${encodeURIComponent(recommended.id)}` : '#pricing';
+        recBtn.textContent = livePricing ? `Choose ${recommended.label} ↗` : 'Live pricing unavailable';
       }
-      renderPricing(PACKS);
-      updateCalculator();
-    }
-
-    // ── Credit calculator ───────────────────────────────────────────────────
-    const minSlider = document.getElementById('minSlider');
-    const minVal = document.getElementById('minVal');
-    const creditsOut = document.getElementById('creditsOut');
-    const recName = document.getElementById('recName');
-    const recDetail = document.getElementById('recDetail');
-    const recBtn = document.getElementById('recBtn');
-
-    function updateCalculator() {
-      const minutes = parseInt(minSlider.value, 10);
-      minVal.textContent = minutes + ' min';
-      const needed = minutes * 60 * CREDITS_PER_SECOND;
-      creditsOut.textContent = needed.toLocaleString();
-
-      if (!PACKS.length) return;
-      let best = PACKS[PACKS.length - 1];
-      for (const p of PACKS) {
-        if (Number(p.credits) >= needed) { best = p; break; }
-      }
-      const packsNeeded = Math.ceil(needed / Number(best.credits));
-      const totalCost = packsNeeded * parseFloat(best.price_usd);
-
-      recName.textContent = best.label;
-      recDetail.textContent = `$${totalCost.toFixed(0)} · ${(packsNeeded * Number(best.credits)).toLocaleString()} credits`;
-      recBtn.textContent = 'Get ' + best.label;
-    }
-
-    minSlider.addEventListener('input', updateCalculator);
-    loadPricing();
+      slider.addEventListener('input', updateCalculator);
+      renderPricing(); updateCalculator();
+      (async () => {
+        try {
+          const response = await fetch(PACKS_URL,{headers:{'Accept':'application/json'},cache:'no-store'});
+          if (!response.ok) throw new Error('Pricing unavailable');
+          const result = await response.json();
+          const list = Array.isArray(result) ? result : result.results;
+          if (!Array.isArray(list) || !list.length) throw new Error('Empty pricing');
+          const checked = list.map(normalise);
+          if (checked.some(p => !p.id || !Number.isFinite(p.price_usd) || p.price_usd <= 0 || !Number.isFinite(p.credits) || p.credits <= 0)) throw new Error('Invalid pricing');
+          packs = checked; livePricing = true;
+        } catch (_) {
+          // Show the advertised fallback packages, but disable checkout if unavailable.
+          packs = FALLBACK_PACKS; livePricing = false;
+        }
+        renderPricing(); updateCalculator();
+      })();
+    })();
   </script>
 </body>
 </html>

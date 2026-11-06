@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 class AuthProvider extends ChangeNotifier with WidgetsBindingObserver {
   UserModel? _user;
   bool _isLoading = false;
@@ -30,18 +34,48 @@ class AuthProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
-  Future<void> init() async {
-    WidgetsBinding.instance.addObserver(this);
-    await ApiService.instance.loadTokens();
+  
 
-    if (ApiService.instance.isLoggedIn) {
-      _isInitialising = true;
-      notifyListeners();
-      await _loadProfile();
-      // _loadProfile sets _isInitialising = false once it either
-      // succeeds, exhausts retries, or detects invalid tokens.
-    }
+Future<void> init() async {
+  WidgetsBinding.instance.addObserver(this);
+
+  final prefs = await SharedPreferences.getInstance();
+  final info = await PackageInfo.fromPlatform();
+
+  // Use version and build number to detect updates.
+  final currentVersion =
+      '${info.version}+${info.buildNumber}';
+
+  const versionKey = 'camifyai_last_installed_version';
+  final previousVersion = prefs.getString(versionKey);
+
+  // First launch or a different app build.
+  if (previousVersion != currentVersion) {
+    await ApiService.instance.clearTokens();
+
+    _user = null;
+    _isInitialising = false;
+
+    await prefs.setString(
+      versionKey,
+      currentVersion,
+    );
+
+    notifyListeners();
+    return;
   }
+
+  // Same installed version: restore previous session.
+  await ApiService.instance.loadTokens();
+
+  if (ApiService.instance.isLoggedIn) {
+    _isInitialising = true;
+    notifyListeners();
+    await _loadProfile();
+  }
+}
+
+
 
   // ── Lifecycle — stop polling when app minimised ───────────────────────────
 
