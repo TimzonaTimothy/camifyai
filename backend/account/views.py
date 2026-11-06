@@ -781,31 +781,13 @@ class DesktopForgotPasswordView(APIView):
 
         otp = PasswordResetOTP.create_for_user(user)
 
-        html_body = f"""
-        <div style="font-family:Arial,sans-serif;background:#0D0D1A;padding:40px;border-radius:12px;max-width:520px;margin:0 auto;">
-            <div style="display:flex;align-items:center;margin-bottom:32px;">
-                <div style="background:#6C63FF;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">
-                    <span style="color:#fff;font-size:20px;font-weight:700;">⚡</span>
-                </div>
-                <span style="color:#fff;font-size:20px;font-weight:700;margin-left:10px;">camifyai</span>
-            </div>
-            <h2 style="color:#fff;font-size:24px;font-weight:700;margin-bottom:8px;">Password Reset Code</h2>
-            <p style="color:#aaa;margin-bottom:24px;line-height:1.6;">
-                Hi {user.email},<br><br>
-                We received a request to reset the password for your camifyai account.
-                Enter the code below in the app to set a new password.
-            </p>
-            <div style="background:#1A1A2E;border:2px solid #6C63FF;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px;">
-                <span style="color:#fff;font-size:36px;font-weight:700;letter-spacing:12px;">{otp.code}</span>
-            </div>
-            <p style="color:#666;font-size:12px;margin-top:28px;line-height:1.6;">
-                This code expires in <strong style="color:#aaa;">10 minutes</strong>. 
-                If you did not request a password reset, you can safely ignore this email.
-            </p>
-            <hr style="border:none;border-top:1px solid #222;margin:24px 0;">
-            <p style="color:#555;font-size:11px;">© camifyai Platform</p>
-        </div>
-        """
+        html_body = render_to_string(
+            "mail/desktop_reset_code.html",
+            {
+                "code": otp.code,
+                "email": user.email,
+            },
+        )
 
         try:
             _send_desktop_email(
