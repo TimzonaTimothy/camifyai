@@ -18,12 +18,6 @@ import '../../widgets/shared_widgets.dart';
 import '../../utils/error_handler.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GATEWAY ENUM
-// ─────────────────────────────────────────────────────────────────────────────
-
-enum PaymentGateway { flutterwave, crypto }
-
-// ─────────────────────────────────────────────────────────────────────────────
 // BILLING SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -43,12 +37,10 @@ class _BillingScreenState extends State<BillingScreen> {
   final bool _historyLoading = false;
   bool _loading = true;
 
-  // Gateway & currency selection
-  PaymentGateway _gateway = PaymentGateway.crypto;
+  // Currency selection
   String _cryptoCurrency = 'usdtbsc';
   bool _feePaidByUser = true;
   String? _pendingProvider;
-  String _fwCurrency = 'USD';
 
   // Pending payment tracking
   int? _pendingPaymentId;
@@ -61,7 +53,6 @@ class _BillingScreenState extends State<BillingScreen> {
 
   // ── Currencies loaded from backend ────────────────────────────────────────
   List<Map<String, String>> _cryptoCurrencies = [];
-  List<Map<String, String>> _fwCurrencies = [];
 
   @override
   void initState() {
@@ -99,17 +90,6 @@ class _BillingScreenState extends State<BillingScreen> {
           .where((c) => c['id']!.isNotEmpty)
           .toList();
 
-      // Parse fiat currencies from backend
-      final rawFiat = (currencies['fiat'] as List? ?? [])
-          .map((c) => {
-                'id': (c['id'] as String? ?? ''),
-                'label': (c['label'] as String? ?? ''),
-                'flag': (c['flag'] as String? ?? '🌍'),
-              })
-          .where((c) => c['id']!.isNotEmpty)
-          .toList();
-
-      if (!mounted) return;
       if (!mounted) return;
       setState(() {
         _packs = packs
@@ -122,17 +102,12 @@ class _BillingScreenState extends State<BillingScreen> {
         _historyTotal = historyData['count'] ?? 0;
         _walletAddresses = wallets;
         _cryptoCurrencies = rawCrypto;
-        _fwCurrencies = rawFiat;
         _feePaidByUser = currencies['fee_paid_by_user'] == true;
 
         // Auto-select first currency if current selection no longer exists
         if (_cryptoCurrencies.isNotEmpty &&
             !_cryptoCurrencies.any((c) => c['id'] == _cryptoCurrency)) {
           _cryptoCurrency = _cryptoCurrencies.first['id']!;
-        }
-        if (_fwCurrencies.isNotEmpty &&
-            !_fwCurrencies.any((c) => c['id'] == _fwCurrency)) {
-          _fwCurrency = _fwCurrencies.first['id']!;
         }
 
         _loading = false;
@@ -159,17 +134,10 @@ class _BillingScreenState extends State<BillingScreen> {
     Map<String, dynamic> result;
 
     try {
-      if (_gateway == PaymentGateway.flutterwave) {
-        result = await ApiService.instance.createFlutterwavePayment(
-          packId: pack.id,
-          currency: _fwCurrency,
-        );
-      } else {
-        result = await ApiService.instance.createCryptoPayment(
-          packId: pack.id,
-          currency: _cryptoCurrency,
-        );
-      }
+      result = await ApiService.instance.createCryptoPayment(
+        packId: pack.id,
+        currency: _cryptoCurrency,
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -209,8 +177,7 @@ class _BillingScreenState extends State<BillingScreen> {
     _startPaymentPolling(paymentId, txRef: txRef);
     if (paymentUrl != null && paymentUrl.isNotEmpty) {
       await _openCheckout(paymentUrl);
-    } else if (_pendingProvider != 'nowpayments' &&
-        _gateway == PaymentGateway.crypto) {
+    } else if (_pendingProvider != 'nowpayments') {
       await _showPendingInstructionsDialog(result);
     }
   }
@@ -237,26 +204,10 @@ class _BillingScreenState extends State<BillingScreen> {
     // Hosted crypto checkout settles automatically; legacy manual records keep their slower interval.
     final interval = _pendingProvider == 'nowpayments'
         ? const Duration(seconds: 10)
-        : _gateway == PaymentGateway.flutterwave
-            ? const Duration(seconds: 5)
-            : const Duration(seconds: 30);
+        : const Duration(seconds: 30);
 
     _paymentPollTimer = Timer.periodic(interval, (_) async {
-      // For Flutterwave, also try to verify via tx_ref
-      if (_gateway == PaymentGateway.flutterwave && txRef != null) {
-        final verify =
-            await ApiService.instance.verifyFlutterwavePayment(txRef: txRef);
-        if (verify['status'] == 'confirmed') {
-          _handlePaymentConfirmed(
-            paymentId: paymentId,
-            credits: verify['credits'] as int? ?? 0,
-            balance: (verify['credits_balance'] as num?)?.toDouble() ?? 0,
-          );
-          return;
-        }
-      }
-
-      // Always poll the generic status endpoint as well
+      // Poll the generic status endpoint
       final Map<String, dynamic> status;
       try {
         status = await ApiService.instance.getPaymentStatus(paymentId);
@@ -575,83 +526,86 @@ class _BillingScreenState extends State<BillingScreen> {
           ? const Center(
               child: CircularProgressIndicator(
                   color: AppColors.accent, strokeWidth: 2))
-          : AppPage(
-              padding: AppLayout.padding(context),
+          : SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Header ─────────────────────────────────────────────
-                  AdaptiveRow(
-                    breakpoint: 620,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-  'Time',
-  style: TextStyle(
-    color: AppColors.textPrimary,
-    fontSize: 28,
-    fontWeight: FontWeight.w600,
-    letterSpacing: -1.0,
-  ),
-),
-const SizedBox(height: 6),
-const Text(
-  'Add streaming time. Pay with crypto when you’re ready.',
-  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-),
-                        ],
+                  // ── Full-bleed dramatic hero ───────────────────────────
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF0C0F0E), AppColors.bg],
                       ),
-                      const Spacer(),
-                      // Balance chip — time prominent
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppColors.card,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.timer_rounded,
-                                    color: AppColors.accent, size: 16),
-                                const SizedBox(width: 6),
-                                Text(
-                                  CreditDisplay.toTime(auth.credits),
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 18,
-                                  ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1360),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              AppLayout.padding(context).horizontal / 2,
+                              AppLayout.padding(context).vertical,
+                              AppLayout.padding(context).horizontal / 2,
+                              40),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('BALANCE',
+                                  style: TextStyle(
+                                      color: AppColors.accent,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 3)),
+                              const SizedBox(height: 12),
+                              Text(
+                                CreditDisplay.toTime(auth.credits),
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 72,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -3,
+                                  height: 1,
                                 ),
-                              ],
-                            ),
-                          ],
+                              ).animate().fadeIn(),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Add streaming time with USDT.',
+                                style: TextStyle(
+                                    color: AppColors.textMuted, fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ).animate().fadeIn(),
+                    ),
+                  ),
 
-                  const SizedBox(height: 28),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1360),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                AppLayout.padding(context).horizontal / 2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                  const SizedBox(height: 8),
 
                   // ── Pending payment banner ─────────────────────────────
                   if (_pendingPaymentId != null)
                     Container(
-                      padding: const EdgeInsets.all(18),
-                      margin: const EdgeInsets.only(bottom: 24),
-                      decoration: BoxDecoration(
-                        color: AppColors.warningDim,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                            color: AppColors.warning.withOpacity(0.4)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 16),
+                      margin: const EdgeInsets.only(bottom: 32),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                            left: BorderSide(
+                                color: AppColors.warning, width: 3)),
                       ),
                       child: Row(
                         children: [
@@ -671,8 +625,7 @@ const Text(
                                         color: AppColors.warning,
                                         fontWeight: FontWeight.w600)),
                                 Text(
-                                  (_gateway == PaymentGateway.flutterwave ||
-                                          _pendingProvider == 'nowpayments')
+                                  _pendingProvider == 'nowpayments'
                                       ? 'Complete checkout in your browser. Streaming time is added automatically after the payment settles.'
                                       : 'Awaiting manual confirmation. You\'ll receive an email when your credits are added.',
                                   style: const TextStyle(
@@ -689,8 +642,7 @@ const Text(
                                   _openCheckout(_pendingPaymentUrl!),
                               child: const Text('Reopen checkout'),
                             ),
-                          if (_gateway == PaymentGateway.crypto &&
-                              _pendingProvider != 'nowpayments' &&
+                          if (_pendingProvider != 'nowpayments' &&
                               _pendingPaymentId != null)
                             TextButton.icon(
                               icon: const Icon(Icons.upload_rounded, size: 14),
@@ -705,20 +657,17 @@ const Text(
                       ),
                     ).animate().fadeIn(),
 
-                  // ── Gateway selector ───────────────────────────────────
-                  _GatewaySelector(
-                    selected: _gateway,
-                    onChanged: (gw) => setState(() => _gateway = gw),
-                  ).animate().fadeIn(delay: 50.ms),
+                  // ── Network selector (flat, no card chrome) ─────────────
+                  const Text('NETWORK',
+                      style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2)),
+                  const SizedBox(height: 14),
 
-                  const SizedBox(height: 20),
-
-                  // ── Currency selector (loaded from backend) ────────────
                   Builder(builder: (context) {
-                    final isFw = _gateway == PaymentGateway.flutterwave;
-                    final list = isFw ? _fwCurrencies : _cryptoCurrencies;
-                    if (list.isEmpty) {
-                      // Still loading or no currencies configured
+                    if (_cryptoCurrencies.isEmpty) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Row(children: [
@@ -736,36 +685,31 @@ const Text(
                       );
                     }
                     return _CurrencySelector(
-                      currencies: list,
-                      selected: isFw ? _fwCurrency : _cryptoCurrency,
-                      onChanged: (c) => setState(() {
-                        if (isFw)
-                          _fwCurrency = c;
-                        else
-                          _cryptoCurrency = c;
-                      }),
-                    ).animate().fadeIn();
-                  }),
+                      currencies: _cryptoCurrencies,
+                      selected: _cryptoCurrency,
+                      onChanged: (c) => setState(() => _cryptoCurrency = c),
+                    );
+                  }).animate().fadeIn(delay: 50.ms),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
-                  if (_gateway == PaymentGateway.crypto) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                          color: AppColors.accentDim,
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Text(
-                          _feePaidByUser
-                              ? 'Pay with USDT on the network shown at checkout. Processing and network fees are added to your total and shown before you pay. Use the exact network and amount displayed.'
-                              : 'Pay with USDT on the network shown at checkout. Use the exact network and amount displayed. Fees and the final payment amount are shown before you pay.',
-                          style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                              height: 1.6)),
-                    ),
-                  ],
+                  Text(
+                      _feePaidByUser
+                          ? 'Fees are added to your total and shown before you pay.'
+                          : 'Fees and the final amount are shown before you pay.',
+                      style: const TextStyle(
+                          color: AppColors.textMuted, fontSize: 12)),
+
+                  const SizedBox(height: 44),
+
+                  const Text('CHOOSE A PACK',
+                      style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2)),
+                  const SizedBox(height: 16),
+
                   // ── Credit packs grid ──────────────────────────────────
                   LayoutBuilder(builder: (ctx, constraints) {
                     final cols = constraints.maxWidth >= 1120
@@ -780,11 +724,10 @@ const Text(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisExtent:
-                          MediaQuery.textScalerOf(context).scale(300) + 60,
+                          MediaQuery.textScalerOf(context).scale(210) + 50,
                       children: _packs.asMap().entries.map((e) {
                         return _PackCard(
                           pack: e.value,
-                          gateway: _gateway,
                           onBuy: () => _buyPack(e.value),
                         )
                             .animate()
@@ -796,7 +739,12 @@ const Text(
                   const SizedBox(height: 36),
 
                   // ── Payment history ────────────────────────────────────
-                  const SectionHeader(title: 'Payment History'),
+                  const Text('PAYMENT HISTORY',
+                      style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2)),
                   const SizedBox(height: 16),
 
                   _history.isEmpty
@@ -852,182 +800,14 @@ const Text(
                         ),
                       ],
                     ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// GATEWAY SELECTOR
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _GatewaySelector extends StatelessWidget {
-  final PaymentGateway selected;
-  final ValueChanged<PaymentGateway> onChanged;
-
-  const _GatewaySelector({required this.selected, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Payment Method',
-            style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600)),
-        const SizedBox(height: 10),
-        AdaptiveRow(
-          breakpoint: 760,
-          children: [
-            const Expanded(
-                child: _GatewayCard(
-              label: 'Card / Bank / Mobile Money',
-              sublabel: 'Flutterwave · NGN, USD, GHS, KES +more',
-              icon: Icons.credit_card_rounded,
-              color: Color(0xFFF5A623),
-              // badge:       '🌍 Africa + Global',
-              // isSelected:  selected == PaymentGateway.flutterwave,
-              // onTap:       () => onChanged(PaymentGateway.flutterwave),
-              badge: '🔜 Coming Soon',
-              isSelected: false,
-              onTap: null,
-              comingSoon: true,
-            )),
-            const SizedBox(width: 14),
-            Expanded(
-                child: _GatewayCard(
-              label: 'USDT checkout',
-              sublabel: 'Secure checkout with NOWPayments',
-              icon: Icons.currency_bitcoin_rounded,
-              color: const Color(0xFFC9EF9C),
-              badge: 'Automatic confirmation',
-              isSelected: selected == PaymentGateway.crypto,
-              onTap: () => onChanged(PaymentGateway.crypto),
-            )),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _GatewayCard extends StatelessWidget {
-  final String label;
-  final String sublabel;
-  final IconData icon;
-  final Color color;
-  final String badge;
-  final bool isSelected;
-  final VoidCallback? onTap;
-  final bool comingSoon;
-
-  const _GatewayCard({
-    required this.label,
-    required this.sublabel,
-    required this.icon,
-    required this.color,
-    required this.badge,
-    required this.isSelected,
-    required this.onTap,
-    this.comingSoon = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Opacity(
-        opacity: comingSoon ? 0.55 : 1.0,
-        child: Stack(children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isSelected ? color.withOpacity(0.08) : AppColors.card,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: isSelected ? color : AppColors.border,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? color.withOpacity(0.15)
-                        : AppColors.surface,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon,
-                      color: isSelected ? color : AppColors.textMuted,
-                      size: 22),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(label,
-                          style: TextStyle(
-                            color: isSelected ? color : AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          )),
-                      const SizedBox(height: 2),
-                      Text(sublabel,
-                          style: const TextStyle(
-                              color: AppColors.textMuted, fontSize: 10),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? color.withOpacity(0.12)
-                              : AppColors.surface,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(badge,
-                            style: TextStyle(
-                              color: isSelected ? color : AppColors.textMuted,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Icon(Icons.check_circle_rounded, color: color, size: 18),
-              ],
-            ),
-          ),
-          if (comingSoon)
-            Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: const Text('Coming Soon',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700)),
-                )),
-        ]),
-      ),
     );
   }
 }
@@ -1049,54 +829,50 @@ class _CurrencySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Currency',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: currencies.map((c) {
-            final isSelected = selected == c['id'];
-            final icon = c['flag'] ?? '';
-            return GestureDetector(
-              onTap: () => onChanged(c['id']!),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 140),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.accentDim : AppColors.card,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? AppColors.accent : AppColors.border,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(icon, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 5),
-                    Flexible(
-                        child: Text(c['label']!,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? AppColors.accent
-                                  : AppColors.textSecondary,
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ))),
-                  ],
-                ),
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: currencies.map((c) {
+        final isSelected = selected == c['id'];
+        final icon = c['flag'] ?? '';
+        return GestureDetector(
+          onTap: () => onChanged(c['id']!),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.accent : AppColors.surface,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: isSelected ? AppColors.accent : AppColors.border,
               ),
-            );
-          }).toList(),
-        ),
-      ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isSelected)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 5),
+                    child: Icon(Icons.check_circle_rounded,
+                        size: 14, color: AppColors.onAccent),
+                  )
+                else
+                  Text(icon, style: const TextStyle(fontSize: 13)),
+                Flexible(
+                    child: Text(c['label']!,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppColors.onAccent
+                              : AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                        ))),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -1107,131 +883,78 @@ class _CurrencySelector extends StatelessWidget {
 
 class _PackCard extends StatelessWidget {
   final CreditPack pack;
-  final PaymentGateway gateway;
   final VoidCallback onBuy;
 
   const _PackCard({
     required this.pack,
-    required this.gateway,
     required this.onBuy,
   });
 
   @override
   Widget build(BuildContext context) {
-    
-final timeStr = CreditDisplay.toTime(
-  pack.credits.toDouble(),
-);
-
+    final timeStr = CreditDisplay.toTime(pack.credits.toDouble());
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: pack.popular ? AppColors.accent : AppColors.border,
-          width: pack.popular ? 1.5 : 1,
-        ),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Popular badge
           if (pack.popular)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: AppColors.accent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text('🔥 Popular',
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Text('POPULAR',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600)),
+                      color: AppColors.accent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2)),
             ),
-
-          // Icon
-          Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: pack.popular ? AppColors.accentDim : AppColors.surface,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.timer_rounded,
-                color:
-                    pack.popular ? AppColors.accent : AppColors.textSecondary,
-                size: 22),
-          ),
-
-          const SizedBox(height: 12),
 
           // Time — the hero number
           Text(
             timeStr,
             style: const TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 24,
+              fontSize: 32,
               fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
+              letterSpacing: -1.2,
+              height: 1,
             ),
           ),
-          const Text('streaming time',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
-
           const SizedBox(height: 6),
-
-          // Description
           Text(pack.description,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
               maxLines: 2,
               overflow: TextOverflow.ellipsis),
 
           const Spacer(),
 
-          // Gateway indicator
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Icon(
-                  gateway == PaymentGateway.flutterwave
-                      ? Icons.credit_card_rounded
-                      : Icons.currency_bitcoin_rounded,
-                  size: 11,
-                  color: AppColors.textMuted,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  gateway == PaymentGateway.flutterwave
-                      ? 'Card / Bank / Mobile Money'
-                      : 'Cryptocurrency',
-                  style:
-                      const TextStyle(color: AppColors.textMuted, fontSize: 10),
-                ),
-              ],
-            ),
-          ),
+          Text('\$${pack.priceUsd}',
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800)),
 
-          // Buy button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onBuy,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    pack.popular ? AppColors.accent : AppColors.surface,
-                foregroundColor:
-                    pack.popular ? AppColors.onAccent : AppColors.textPrimary,
-                side: pack.popular
-                    ? null
-                    : const BorderSide(color: AppColors.border),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-              child: Text('\$${pack.priceUsd}',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 14),
+
+          GestureDetector(
+            onTap: onBuy,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text('Buy now',
+                    style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_forward_rounded,
+                    size: 15, color: AppColors.accent),
+              ],
             ),
           ),
         ],
@@ -1254,7 +977,7 @@ class _PaymentRow extends StatelessWidget {
     final isFw = payment.isFlutterwave;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
@@ -1263,20 +986,22 @@ class _PaymentRow extends StatelessWidget {
         children: [
           // Gateway icon
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: isFw
                   ? const Color(0xFFF5A623).withOpacity(0.1)
                   : AppColors.accentDim,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(999),
             ),
             child: Icon(
               isFw ? Icons.credit_card_rounded : Icons.currency_bitcoin_rounded,
-              size: 16,
+              size: 17,
               color: isFw ? const Color(0xFFF5A623) : AppColors.accent,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
 
           // Label + currency + date
           Expanded(
