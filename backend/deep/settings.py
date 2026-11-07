@@ -304,7 +304,7 @@ NOWPAYMENTS_API_KEY = os.environ.get("NOWPAYMENTS_API_KEY", "3Z4JQFJ-8AS4KR5-J99
 NOWPAYMENTS_IPN_SECRET = os.environ.get("NOWPAYMENTS_IPN_SECRET", "rb2bUxq0DkldifJ20mr/3kfW5AR5x01H")
 
 # Your public-facing domain (used in payment webhook URLs)
-BASE_URL = "https://streamaicam.com"
+BASE_URL = "https://camifyai.com"
 
 # Credit packs you sell (credits → usd price)
 FREE_TRIAL_CREDITS = 50  # 1 free session on signup
@@ -313,11 +313,14 @@ FREE_TRIAL_CREDITS = 50  # 1 free session on signup
 # XMax real-time streaming: 2 credits per second
 # 7,200 credits = 1 hour
 
+# XMax real-time streaming: 2 credits per second
+# 7,200 credits = 1 hour
+
 CREDIT_PACKS = [
     {
         "id": "starter",
         "label": "Starter",
-        "credits": 7200,
+        "credits": 3600,
         "price_usd": "20.00",
         "popular": False,
         "description": "1 hour of real-time AI streaming",
@@ -327,7 +330,7 @@ CREDIT_PACKS = [
     {
         "id": "creator",
         "label": "Creator",
-        "credits": 36000,
+        "credits": 18000,
         "price_usd": "100.00",
         "popular": False,
         "description": "5 hours of real-time AI streaming",
@@ -337,7 +340,7 @@ CREDIT_PACKS = [
     {
         "id": "pro",
         "label": "Pro",
-        "credits": 72000,
+        "credits": 36000,
         "price_usd": "200.00",
         "popular": True,
         "description": "10 hours of real-time AI streaming",
@@ -347,7 +350,7 @@ CREDIT_PACKS = [
     {
         "id": "agency",
         "label": "Agency",
-        "credits": 180000,
+        "credits": 90000,
         "price_usd": "500.00",
         "popular": False,
         "description": "25 hours of real-time AI streaming",
@@ -357,7 +360,7 @@ CREDIT_PACKS = [
     {
         "id": "power",
         "label": "Power",
-        "credits": 360000,
+        "credits": 180000,
         "price_usd": "1000.00",
         "popular": False,
         "description": "50 hours of real-time AI streaming",
@@ -365,6 +368,7 @@ CREDIT_PACKS = [
         "sessions": 0,
     },
 ]
+
 
 
 
