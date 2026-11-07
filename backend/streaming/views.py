@@ -11,11 +11,11 @@ from .xmax import create_realtime_token
 from account.models import UsageLog, UserProfile, SiteSettings
 
 
-CREDITS_PER_SECOND = Decimal("2")
+CREDITS_PER_SECOND = Decimal("1")   # 1 credit = 1 second of realtime
 HEARTBEAT_INTERVAL_S = 10
 CREDITS_PER_HEARTBEAT = (
     CREDITS_PER_SECOND * HEARTBEAT_INTERVAL_S
-)
+)  # = 10 credits per heartbeat
 
 COST_QUEUE_VIDEO = Decimal("100")
 COST_QUEUE_IMAGE = Decimal("10")

@@ -464,7 +464,7 @@ const FACE_URL = '$faceDataUrl';
 const BRIDGE_KEY = '$_bridgeKey';
 
 // ── Time-based billing ────────────────────────────────────────────────────────
-const CREDITS_PER_SECOND    = 2;           // 2 credits burned every second
+const CREDITS_PER_SECOND    = 1;          // 2 credits burned every second
 const HEARTBEAT_INTERVAL_S  = 10;          // POST /heartbeat/ every 10s
 
 
