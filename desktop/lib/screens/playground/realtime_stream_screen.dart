@@ -252,18 +252,20 @@ class _RealtimeStreamScreenState extends State<RealtimeStreamScreen> {
     let attached = false;
 
     function attachStream() {
-      try {
-        if (window.opener && window.opener._remoteStream) {
-          video.srcObject = window.opener._remoteStream;
-          video.play && video.play().catch(()=>{});
-          video.style.display = 'block';
-          if (msg) msg.style.display = 'none';
-          attached = true;
-          return true;
-        }
-      } catch(e) { /* cross-origin or closed */ }
-      return false;
+  try {
+    if (window.opener && window.opener._remoteStream) {
+      if (video.srcObject !== window.opener._remoteStream) {
+        video.srcObject = window.opener._remoteStream;
+        video.play && video.play().catch(()=>{});
+      }
+      video.style.display = 'block';
+      if (msg) msg.style.display = 'none';
+      attached = true;
+      return true;
     }
+  } catch(e) {}
+  return false;
+}
 
     function tryAttachStream() {
       if (attached) return;
@@ -272,12 +274,11 @@ class _RealtimeStreamScreenState extends State<RealtimeStreamScreen> {
 
     // Try immediately, then poll every 300ms until attached
     tryAttachStream();
-    const pollId = setInterval(function() {
-      tryAttachStream();
-      if (attached) clearInterval(pollId);
-      // Also stop if opener is gone
-      if (!window.opener || window.opener.closed) clearInterval(pollId);
-    }, 300);
+const pollId = setInterval(function() {
+  // Always try to re-attach — stream object can be replaced after reconnect
+  attachStream();
+  if (!window.opener || window.opener.closed) clearInterval(pollId);
+}, 300);
 
     // Also listen for the opener to notify us directly
     window.addEventListener('message', function(e) {
@@ -536,6 +537,23 @@ function notifyPopout() {
   }
 }
 
+// Hidden sink so WebRTC tracks keep running when the main window is minimized
+let keepAliveVideo = null;
+function ensureKeepAlive(stream) {
+  if (!stream) return;
+  if (!keepAliveVideo) {
+    keepAliveVideo = document.createElement('video');
+    keepAliveVideo.muted = true;
+    keepAliveVideo.playsInline = true;
+    keepAliveVideo.autoplay = true;
+    keepAliveVideo.style.cssText =
+      'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-10px;top:-10px;';
+    document.body.appendChild(keepAliveVideo);
+  }
+  keepAliveVideo.srcObject = stream;
+  keepAliveVideo.play().catch(() => {});
+}
+
 // ── Pop out AI output into a SEPARATE browser window (for OBS) ───────────────
 window.popoutAI = function() {
   // Close existing popout if any
@@ -780,11 +798,15 @@ if (state.reason?.kind === 'failure') {
       }
     });
     rtClient.setRemoteMediaTracksListener(tracks => {
-      if (!tracks) return;
-      remoteStreamRef = new MediaStream([tracks.videoTrack, ...(tracks.audioTrack ? [tracks.audioTrack] : [])]);
-      window._remoteStream = remoteStreamRef;
-      notifyPopout();
-    });
+  if (!tracks) return;
+  remoteStreamRef = new MediaStream([
+    tracks.videoTrack,
+    ...(tracks.audioTrack ? [tracks.audioTrack] : []),
+  ]);
+  window._remoteStream = remoteStreamRef;
+  ensureKeepAlive(remoteStreamRef);  // keep tracks alive when main window is minimized
+  notifyPopout();
+});
     setStatus('Requesting camera…');
     
 localStream = await rtClient.createLocalCameraStream({
@@ -893,7 +915,13 @@ window.clearFace = async function() {
   catch(e) { log('Failed: ' + e.message, 'err'); }
 };
 
-window.addEventListener('pagehide', () => { stopAllTimers(); if (rtClient) rtClient.close().catch(() => {}); });
+window.addEventListener('pagehide', (e) => {
+  // Don't kill the session just because the main window was minimized
+  // while the OBS pop-out is still open.
+  if (isPopped && popoutWin && !popoutWin.closed) return;
+  stopAllTimers();
+  if (rtClient) rtClient.close().catch(() => {});
+});
 
 document.getElementById('promptInput').addEventListener('keydown', e => { if (e.key==='Enter') window.applyPrompt(); });
 window.startStream(); // Automatically connect with the selected face.
