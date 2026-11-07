@@ -1,8 +1,6 @@
-
-
-
 class CreditDisplay {
-  static const double realtimeCreditsPerSecond = 2.0;
+  // 3600 credits = 1 hour of realtime streaming → 1 credit per second.
+  static const double realtimeCreditsPerSecond = 1.0;
 
   /// Convert backend credits to streaming duration.
   static String toTime(
@@ -47,10 +45,10 @@ class CreditDisplay {
     return '${remainingSeconds}s';
   }
 
-  /// Equivalent value at the new $20/hour package rate.
+  /// Equivalent value at the $20/hour package rate.
   /// This is not a refund or cash balance.
   static String toMoney(double credits) {
-    final value = credits * 20.0 / 7200.0;
+    final value = credits * 20.0 / 3600.0;
     return '\$${value.toStringAsFixed(2)}';
   }
 }

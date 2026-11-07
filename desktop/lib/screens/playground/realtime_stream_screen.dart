@@ -789,8 +789,8 @@ if (state.reason?.kind === 'failure') {
     
 localStream = await rtClient.createLocalCameraStream({
   videoFormat: new sdk.RealtimeVideoFormat({
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     fps: 30,
   }),
   position: sdk.CameraPosition.front,

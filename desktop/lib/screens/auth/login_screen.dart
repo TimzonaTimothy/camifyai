@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/camify_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -111,29 +112,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Logo
-                        Row(
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: AppColors.accent,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.bolt_rounded,
-                                  color: AppColors.onAccent, size: 22),
-                            ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'camifyai',
-                              style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ).animate().fadeIn(delay: 100.ms),
+                        // Logo — matches website / live studio brand
+const CamifyLogo(iconSize: 36, fontSize: 20)
+    .animate()
+    .fadeIn(delay: 100.ms),
 
                         const Spacer(),
 

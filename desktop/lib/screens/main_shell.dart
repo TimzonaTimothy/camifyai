@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../utils/credit_display.dart';
 import '../widgets/announcement_banner.dart';
 import '../widgets/update_banner.dart';
+import '../widgets/camify_logo.dart';
 
 class MainShell extends StatefulWidget {
   final Widget child;
@@ -38,11 +39,7 @@ class _MainShellState extends State<MainShell> {
           backgroundColor: AppColors.bg,
           appBar: compact
               ? AppBar(
-                  title: const Text('camifyai',
-                      style: TextStyle(
-                          fontSize: 21,
-                          letterSpacing: -0.8,
-                          fontWeight: FontWeight.w700)),
+                  title: const CamifyLogo(iconSize: 28, fontSize: 18),
                   bottom: PreferredSize(
                       preferredSize: const Size.fromHeight(1),
                       child: Container(height: 1, color: AppColors.border)),
@@ -100,25 +97,13 @@ class _Sidebar extends StatelessWidget {
           color: AppColors.surface,
           border: Border(right: BorderSide(color: AppColors.border))),
       child: Column(children: [
-        Padding(
-            padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
-            child: Row(children: [
-              Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                      color: AppColors.accent,
-                      borderRadius: BorderRadius.circular(9)),
-                  child: const Icon(Icons.auto_awesome_rounded,
-                      size: 18, color: AppColors.onAccent)),
-              const SizedBox(width: 10),
-              const Text('camifyai',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.8)),
-            ])),
+        const Padding(
+    padding: EdgeInsets.fromLTRB(22, 26, 22, 24),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: CamifyLogo(iconSize: 32, fontSize: 20),
+    ),
+  ),
         const Divider(height: 1),
         Expanded(
             child: ListView(padding: const EdgeInsets.all(16), children: [
