@@ -309,58 +309,63 @@ BASE_URL = "https://streamaicam.com"
 # Credit packs you sell (credits → usd price)
 FREE_TRIAL_CREDITS = 50  # 1 free session on signup
 
+
+# XMax real-time streaming: 2 credits per second
+# 7,200 credits = 1 hour
+
 CREDIT_PACKS = [
     {
         "id": "starter",
         "label": "Starter",
-        "credits": 1000,
+        "credits": 7200,
         "price_usd": "20.00",
         "popular": False,
-        "description": "~10 sessions · ~8 mins total",
-        "streaming_minutes": 8,
-        "sessions": 20
+        "description": "1 hour of real-time AI streaming",
+        "streaming_minutes": 60,
+        "sessions": 0,
     },
     {
         "id": "creator",
         "label": "Creator",
-        "credits": 5000,
+        "credits": 36000,
         "price_usd": "100.00",
         "popular": False,
-        "description": "~50 sessions · ~42 mins total",
-        "streaming_minutes": 42,
-        "sessions": 100
+        "description": "5 hours of real-time AI streaming",
+        "streaming_minutes": 300,
+        "sessions": 0,
     },
     {
         "id": "pro",
         "label": "Pro",
-        "credits": 10000,
+        "credits": 72000,
         "price_usd": "200.00",
         "popular": True,
-        "description": "~100 sessions · ~1 hrs 23 mins — best value",
-        "streaming_minutes": 83,
-        "sessions": 200
+        "description": "10 hours of real-time AI streaming",
+        "streaming_minutes": 600,
+        "sessions": 0,
     },
     {
         "id": "agency",
         "label": "Agency",
-        "credits": 50000,
-        "price_usd": "700.00",
+        "credits": 180000,
+        "price_usd": "500.00",
         "popular": False,
-        "description": "~500 sessions · ~6 hrs 40 mins total",
-        "streaming_minutes": 400,
-        "sessions": 500
+        "description": "25 hours of real-time AI streaming",
+        "streaming_minutes": 1500,
+        "sessions": 0,
     },
     {
         "id": "power",
         "label": "Power",
-        "credits": 80000,
+        "credits": 360000,
         "price_usd": "1000.00",
         "popular": False,
-        "description": "~800 sessions · ~11 hrs 7 mins total",
-        "streaming_minutes": 667,
-        "sessions": 800
+        "description": "50 hours of real-time AI streaming",
+        "streaming_minutes": 3000,
+        "sessions": 0,
     },
 ]
+
 
 
 

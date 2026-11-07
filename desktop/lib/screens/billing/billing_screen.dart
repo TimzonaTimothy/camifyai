@@ -1108,9 +1108,11 @@ class _PackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = pack.streamingMinutes > 0
-        ? '${pack.streamingMinutes}m 00s'
-        : CreditDisplay.toTime(pack.credits.toDouble());
+    
+final timeStr = CreditDisplay.toTime(
+  pack.credits.toDouble(),
+);
+
 
     return Container(
       padding: const EdgeInsets.all(18),

@@ -1,44 +1,56 @@
 
 
-class CreditDisplay {
-  /// Base rate derived from Starter pack: 2000 coins = $20.00 -> 1 coin = $0.01
 
-  /// Convert raw backend credits to human-readable time string.
-  /// Time varies because each model has a different compute cost!
-  static String toTime(double credits, {String modelType = 'realtime'}) {
+class CreditDisplay {
+  static const double realtimeCreditsPerSecond = 2.0;
+
+  /// Convert backend credits to streaming duration.
+  static String toTime(
+    double credits, {
+    String modelType = 'realtime',
+  }) {
     double seconds;
 
     switch (modelType) {
       case 'v2v':
-        // Cost: $0.04/sec -> 2.66 credits/sec -> 1 credit = 0.375 seconds
         seconds = credits * 0.375;
         break;
       case 'lipsync':
-        // Cost: $0.01/sec -> 0.66 credits/sec -> 1 credit = 1.5 seconds
         seconds = credits * 1.5;
         break;
       case 'image':
-        // Cost: $0.02/image -> 1.33 credits/image
         final images = (credits / 1.333).floor();
         return '$images images';
       case 'realtime':
       default:
-        // Cost: $0.02/sec -> 2.0 credits/sec -> 1 credit = 0.50 seconds
-        // (This means 1000 credits -> 500s -> 8m 20s)
-        seconds = credits * 0.50; 
+        seconds = credits / realtimeCreditsPerSecond;
         break;
     }
 
-    final totalSeconds = seconds.floor();
-    if (totalSeconds < 60) return '${totalSeconds}s';
-    
-    final mins = totalSeconds ~/ 60;
-    final secs = totalSeconds % 60;
-    return '${mins}m ${secs.toString().padLeft(2, '0')}s';
+    final totalSeconds = seconds.floor().clamp(0, 2147483647);
+
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final remainingSeconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      if (minutes == 0 && remainingSeconds == 0) {
+        return '$hours ${hours == 1 ? "hour" : "hours"}';
+      }
+      return '${hours}h ${minutes}m ${remainingSeconds}s';
+    }
+
+    if (minutes > 0) {
+      return '${minutes}m ${remainingSeconds}s';
+    }
+
+    return '${remainingSeconds}s';
   }
 
-  /// Show the estimated base monetary value (1 credit = $0.01)
+  /// Equivalent value at the new $20/hour package rate.
+  /// This is not a refund or cash balance.
   static String toMoney(double credits) {
-    return '\$${(credits * 0.01).toStringAsFixed(2)}';
+    final value = credits * 20.0 / 7200.0;
+    return '\$${value.toStringAsFixed(2)}';
   }
 }
