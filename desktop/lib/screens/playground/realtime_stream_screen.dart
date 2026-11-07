@@ -422,7 +422,16 @@ const pollId = setInterval(function() {
   </section>
 </main>
 <footer class="session-footer">
-  ${hasFace ? '''<div class="ref-panel"><img class="ref-thumb" src="$faceDataUrl" alt="Selected reference face"><div class="ref-info"><strong>Your selected look</strong>Applied automatically when the stream starts</div></div>''' : '<div class="ref-info"><strong>Creative session</strong>Your camera, transformed in real time</div>'}
+  ${hasFace ? '''<div class="ref-panel">
+  <img class="ref-thumb" src="$faceDataUrl" alt="Selected reference face">
+  <div class="ref-info">
+    <strong>Your selected look</strong>
+    Applied when the stream starts — reapply anytime
+  </div>
+  <button class="btn violet" id="applyFaceBtn" onclick="applyFaceSwap()" type="button">
+    Reapply face
+  </button>
+</div>''' : '<div class="ref-info"><strong>Creative session</strong>Your camera, transformed in real time</div>'}
   <p class="session-note">Keep the camifyai app open during your session. Your camera stops when you end the stream.</p>
 </footer>
 <details><summary>Fine-tune your look</summary><div class="prompt-bar">
