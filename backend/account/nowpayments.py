@@ -67,21 +67,36 @@ def create_invoice(payment, callback_url):
     parsed = urlparse(callback_url)
     if parsed.scheme != "https" or not parsed.hostname:
         raise ProviderError("A public HTTPS callback URL is required")
-    fees_by_user = settings.NOWPAYMENTS_FEE_PAID_BY_USER
+    
+    # Keep minimum and invoice quotation modes consistent.
+    fixed_rate = False
+    fees_by_user = False
+
     minimum = request("GET", "/min-amount", params={
         "currency_from": payment.currency,
         "currency_to": settings.NOWPAYMENTS_PAYOUT_CURRENCY,
-        "fiat_equivalent": "usd", "is_fixed_rate": "true",
-        "is_fee_paid_by_user": str(fees_by_user).lower(),
+        "fiat_equivalent": "usd",
+        "is_fixed_rate": "false",
+        "is_fee_paid_by_user": "false",
     })
+
     minimum_amount = number(minimum.get("min_amount"))
     if minimum_amount <= 0:
         raise ProviderError("Invalid provider minimum")
+
     estimate = request("GET", "/estimate", params={
-        "amount": str(payment.amount_usd), "currency_from": "usd", "currency_to": payment.currency,
+        "amount": str(payment.amount_usd),
+        "currency_from": "usd",
+        "currency_to": payment.currency,
     })
-    if number(estimate.get("estimated_amount")) < minimum_amount:
-        raise BelowMinimum("This pack is below the current network minimum. Choose a larger pack or another network.")
+
+    estimated_amount = number(estimate.get("estimated_amount"))
+    if estimated_amount < minimum_amount:
+        raise BelowMinimum(
+            "This pack is below the current network minimum. "
+            "Choose a larger pack or another network."
+        )
+
     payload = {
         "price_amount": float(payment.amount_usd), "price_currency": "usd",
         "pay_currency": payment.currency, "order_id": f"camify-{payment.pk}",
