@@ -401,5 +401,9 @@ XMAX_ENVIRONMENT = os.environ.get("XMAX_ENVIRONMENT", "global")
 # USDT hosted checkout. Configure a matching payout wallet in NOWPayments.
 NOWPAYMENTS_CURRENCIES = [code.strip().lower() for code in os.environ.get("NOWPAYMENTS_CURRENCIES", "usdtbsc").split(",") if code.strip()]
 NOWPAYMENTS_PAYOUT_CURRENCY = os.environ.get("NOWPAYMENTS_PAYOUT_CURRENCY", "usdtbsc")
-NOWPAYMENTS_FEE_PAID_BY_USER = os.environ.get("NOWPAYMENTS_FEE_PAID_BY_USER", "true").lower() == "true"
+
+NOWPAYMENTS_FEE_PAID_BY_USER = os.environ.get(
+    "NOWPAYMENTS_FEE_PAID_BY_USER", "false"
+).lower() == "true"
+
 NOWPAYMENTS_CALLBACK_URL = os.environ.get("NOWPAYMENTS_CALLBACK_URL", "")

@@ -87,7 +87,8 @@ def create_invoice(payment, callback_url):
         "pay_currency": payment.currency, "order_id": f"camify-{payment.pk}",
         "order_description": f"camifyai · {payment.pack_label}",
         "ipn_callback_url": callback_url,
-        "is_fixed_rate": True, "is_fee_paid_by_user": fees_by_user,
+        "is_fixed_rate": False,
+        "is_fee_paid_by_user": False,
     }
     # Checkout redirects never confirm payments; only verified provider settlement does.
     result = request("POST", "/invoice", json=payload)
