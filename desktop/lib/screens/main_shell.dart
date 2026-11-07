@@ -8,9 +8,10 @@ import '../services/update_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/credit_display.dart';
 import '../widgets/announcement_banner.dart';
-import '../widgets/update_banner.dart';
 import '../widgets/camify_logo.dart';
+import '../widgets/update_banner.dart';
 
+/// Session-first shell: top navigation only (no left sidebar).
 class MainShell extends StatefulWidget {
   final Widget child;
   const MainShell({super.key, required this.child});
@@ -33,212 +34,182 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UpdateService>.value(
       value: UpdateService.instance,
-      child: LayoutBuilder(builder: (context, constraints) {
-        final compact = constraints.maxWidth < 1000;
-        return Scaffold(
-          backgroundColor: AppColors.bg,
-          appBar: compact
-              ? AppBar(
-                  title: const CamifyLogo(iconSize: 28, fontSize: 18),
-                  bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(1),
-                      child: Container(height: 1, color: AppColors.border)),
-                )
-              : null,
-          drawer: compact
-              ? Drawer(
-                  width: 280,
-                  backgroundColor: AppColors.surface,
-                  child: SafeArea(child: _Sidebar(closeOnNavigate: true)))
-              : null,
-          body: compact
-              ? widget.child
-              : Row(children: [_Sidebar(), Expanded(child: widget.child)]),
-        );
-      }),
+      child: Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Column(
+          children: [
+            const _TopBar(),
+            const UpdateBanner(),
+            const AnnouncementBanner(),
+            Expanded(child: widget.child),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _Sidebar extends StatelessWidget {
-  final bool closeOnNavigate;
-  const _Sidebar({this.closeOnNavigate = false});
-  static const _navItems = [
-    _NavItem(
-        icon: Icons.grid_view_rounded, label: 'Dashboard', route: '/dashboard'),
-    _NavItem(
-        icon: Icons.videocam_rounded,
-        label: 'Live studio',
-        route: '/playground'),
-    _NavItem(
-        icon: Icons.account_balance_wallet_outlined,
-        label: 'Billing',
-        route: '/billing'),
-    _NavItem(icon: Icons.history_rounded, label: 'Usage', route: '/usage'),
-    _NavItem(
-        icon: Icons.lock_outline_rounded,
-        label: 'Security',
-        route: '/change-password'),
-  ];
+class _TopBar extends StatelessWidget {
+  const _TopBar();
 
-  void _navigate(BuildContext context, String route) {
-    if (closeOnNavigate) Navigator.of(context).pop();
-    context.go(route);
-  }
+  static const _tabs = [
+    _TabItem(label: 'Home', route: '/dashboard'),
+    _TabItem(label: 'Go live', route: '/playground'),
+    _TabItem(label: 'Time', route: '/billing'),
+    _TabItem(label: 'History', route: '/usage'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final location = GoRouterState.of(context).matchedLocation;
     final email = auth.user?.email ?? '';
+    final wide = MediaQuery.sizeOf(context).width >= 900;
+
     return Container(
-      width: 248,
+      padding: EdgeInsets.symmetric(
+        horizontal: wide ? 28 : 16,
+        vertical: 12,
+      ),
       decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(right: BorderSide(color: AppColors.border))),
-      child: Column(children: [
-        const Padding(
-    padding: EdgeInsets.fromLTRB(22, 26, 22, 24),
-    child: Align(
-      alignment: Alignment.centerLeft,
-      child: CamifyLogo(iconSize: 32, fontSize: 20),
-    ),
-  ),
-        const Divider(height: 1),
-        Expanded(
-            child: ListView(padding: const EdgeInsets.all(16), children: [
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        children: [
+          const CamifyLogo(iconSize: 30, fontSize: 18),
+          if (wide) ...[
+            const SizedBox(width: 36),
+            for (final tab in _tabs)
+              _TopTab(
+                label: tab.label,
+                active: location == tab.route ||
+                    location.startsWith('${tab.route}/'),
+                onTap: () => context.go(tab.route),
+              ),
+          ],
+          const Spacer(),
           Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF263425), Color(0xFF182019)]),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border)),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('YOUR STREAMING TIME',
-                        style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 9,
-                            letterSpacing: 1.3)),
-                    const SizedBox(height: 10),
-                    Text(CreditDisplay.toTime(auth.credits),
-                        style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 23,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.8)),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                            onPressed: () => _navigate(context, '/billing'),
-                            style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(0, 36),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 9)),
-                            child: const Text('Add time',
-                                style: TextStyle(fontSize: 11)))),
-                  ])),
-          const Padding(
-              padding: EdgeInsets.fromLTRB(12, 28, 12, 12),
-              child: Text('WORKSPACE',
-                  style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 9,
-                      letterSpacing: 1.6))),
-          for (final item in _navItems)
-            _NavButton(
-                item: item,
-                isActive: location == item.route ||
-                    location.startsWith('${item.route}/'),
-                onTap: () => _navigate(context, item.route)),
-          const SizedBox(height: 24),
-          const AnnouncementBanner(),
-          const UpdateBanner(),
-        ])),
-        const Divider(height: 1),
-        Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(children: [
-              CircleAvatar(
-                  radius: 17,
-                  backgroundColor: AppColors.accentDim,
-                  child: Text(email.isEmpty ? 'C' : email[0].toUpperCase(),
-                      style: const TextStyle(
-                          color: AppColors.accent, fontSize: 12))),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                    Text(auth.user?.username ?? 'Your account',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500)),
-                    Text(auth.user?.plan.toUpperCase() ?? 'FREE',
-                        style: const TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 9,
-                            letterSpacing: 0.8)),
-                  ])),
-              IconButton(
-                  icon: const Icon(Icons.logout_rounded, size: 17),
-                  tooltip: 'Sign out',
-                  onPressed: () async {
-                    await context.read<AuthProvider>().logout();
-                    if (context.mounted) context.go('/login');
-                  }),
-            ])),
-      ]),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.schedule_rounded,
+                    size: 14, color: AppColors.accent),
+                const SizedBox(width: 6),
+                Text(
+                  CreditDisplay.toTime(auth.credits),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          FilledButton(
+            onPressed: () => context.go('/playground'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.onAccent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Go live',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          ),
+          const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            tooltip: 'Account',
+            offset: const Offset(0, 40),
+            color: AppColors.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.border),
+            ),
+            onSelected: (value) async {
+              if (value == 'security') {
+                context.go('/change-password');
+              } else if (value == 'logout') {
+                await context.read<AuthProvider>().logout();
+                if (context.mounted) context.go('/login');
+              } else if (value == 'billing') {
+                context.go('/billing');
+              } else if (value == 'usage') {
+                context.go('/usage');
+              } else if (value == 'home') {
+                context.go('/dashboard');
+              }
+            },
+            itemBuilder: (context) => [
+              if (!wide) ...[
+                const PopupMenuItem(value: 'home', child: Text('Home')),
+                const PopupMenuItem(
+                    value: 'billing', child: Text('Time / billing')),
+                const PopupMenuItem(value: 'usage', child: Text('History')),
+                const PopupMenuDivider(),
+              ],
+              const PopupMenuItem(value: 'security', child: Text('Security')),
+              const PopupMenuItem(value: 'logout', child: Text('Sign out')),
+            ],
+            child: CircleAvatar(
+              radius: 16,
+              backgroundColor: AppColors.accentDim,
+              child: Text(
+                email.isEmpty ? 'C' : email[0].toUpperCase(),
+                style: const TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _NavButton extends StatelessWidget {
-  final _NavItem item;
-  final bool isActive;
+class _TopTab extends StatelessWidget {
+  final String label;
+  final bool active;
   final VoidCallback onTap;
-  const _NavButton({
-    required this.item,
-    required this.isActive,
+  const _TopTab({
+    required this.label,
+    required this.active,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
+      padding: const EdgeInsets.only(right: 6),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.accentDim : Colors.transparent,
+            color: active ? AppColors.accentDim : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            children: [
-              Icon(item.icon,
-                  size: 18,
-                  color: isActive ? AppColors.accent : AppColors.textSecondary),
-              const SizedBox(width: 10),
-              Text(
-                item.label,
-                style: TextStyle(
-                  color: isActive ? AppColors.accent : AppColors.textSecondary,
-                  fontSize: 14,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            style: TextStyle(
+              color: active ? AppColors.accent : AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+            ),
           ),
         ),
       ),
@@ -246,13 +217,8 @@ class _NavButton extends StatelessWidget {
   }
 }
 
-class _NavItem {
-  final IconData icon;
+class _TabItem {
   final String label;
   final String route;
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.route,
-  });
+  const _TabItem({required this.label, required this.route});
 }

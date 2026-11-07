@@ -588,10 +588,20 @@ class _BillingScreenState extends State<BillingScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Billing',
-                              style: Theme.of(context).textTheme.displayMedium),
-                          const Text('Top up your streaming time',
-                              style: TextStyle(color: AppColors.textSecondary)),
+                          const Text(
+  'Time',
+  style: TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 28,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -1.0,
+  ),
+),
+const SizedBox(height: 6),
+const Text(
+  'Add streaming time. Pay with crypto when you’re ready.',
+  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+),
                         ],
                       ),
                       const Spacer(),
